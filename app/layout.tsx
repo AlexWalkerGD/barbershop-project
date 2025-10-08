@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import "./globals.css"
+import { Toaster } from "@/components/ui/sonner"
+import { Card, CardContent } from "@/components/ui/card"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +31,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster />
+
+        <footer>
+          <Card>
+            <CardContent className="px-5 py-6">
+              <p className="text-sm text-gray-400">
+                © 2023 Copyright <span className="font-bold">FSW Barber</span>
+              </p>
+            </CardContent>
+          </Card>
+        </footer>
       </body>
     </html>
   )
