@@ -31,6 +31,7 @@ import { DialogDescription } from "@radix-ui/react-dialog"
 import { deleteBooking } from "@/app/_actions/delete-booking"
 import { toast } from "sonner"
 import { useState } from "react"
+import BookingSummary from "./booking-summary"
 
 interface BookingItemProps {
   booking: Prisma.BookingGetPayload<{
@@ -130,44 +131,19 @@ const BookingItem = ({ booking }: BookingItemProps) => {
             {isConfirmed ? "Confirmado" : "Finalizado"}
           </Badge>
 
-          <Card className="mb-6 mt-3">
-            <CardContent className="space-y-3 p-3">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold">{booking.service.name}</h2>
-                <p className="text-sm font-bold">
-                  {Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "EUR",
-                  }).format(Number(booking.service.price))}
-                </p>
-              </div>
+          <div className="mb-3 mt-6">
+            <BookingSummary
+              barbershop={barbershop}
+              service={booking.service}
+              selectedDate={booking.date}
+            />
+          </div>
 
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm text-gray-400">Data</h2>
-                <p className="text-sm">
-                  {format(booking.date, "d 'de' MMMM", {
-                    locale: ptBR,
-                  })}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm text-gray-400">Horário</h2>
-                <p className="text-sm">
-                  {format(booking.date, "HH:mm", { locale: ptBR })}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm text-gray-400">Horário</h2>
-                <p className="text-sm">{barbershop.name}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {barbershop.phones.map((phone, index) => (
-            <PhoneItem key={index} phone={phone} />
-          ))}
+          <div className="space-y-3">
+            {barbershop.phones.map((phone, index) => (
+              <PhoneItem key={index} phone={phone} />
+            ))}
+          </div>
         </div>
         <SheetFooter className="mt-6">
           <div className="flex items-center gap-3">
