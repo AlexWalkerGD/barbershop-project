@@ -27,7 +27,6 @@ This project is built using **Next.js**, **TypeScript**, and a modern full-stack
 ## 🖼️ Preview
 
 <table>
-  
   <tr>
     <td><img width="300" height="675" alt="Captura de tela 2025-10-19 005202" src="https://github.com/user-attachments/assets/4874a885-21c8-4916-85a1-2168d69e59ec" /></td>
     <td><img width="300" height="675" alt="Captura de tela 2025-10-19 005211" src="https://github.com/user-attachments/assets/0ba8d8ae-6b30-4020-9c48-09f47924b40f" /></td>
