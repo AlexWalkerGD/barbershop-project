@@ -12,8 +12,8 @@ import {
   Dialog,
 } from "@/components/ui/dialog"
 import Image from "next/image"
-import InfoBarber from "@/components/info-barber"
-import NewBarber from "@/components/new-barber"
+import InfoBarber from "@/components/info-barbershop"
+import NewBarber from "@/components/new-barbershop"
 import { DialogContent } from "@/components/ui/dialog"
 
 interface Barbershop {
@@ -25,7 +25,7 @@ interface Barbershop {
 
 const Dashboard = () => {
   const [barbershops, setBarbershops] = useState<Barbershop[]>([])
-  const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
+  const [newBarbershop, setNewBarbershop] = useState(false)
   const handleLoginWithGoogleClick = () => signIn("google")
   const { data: session } = useSession()
 
@@ -78,7 +78,7 @@ const Dashboard = () => {
             </div>
             <Button
               className="mt-3 p-[10px] pb-4 text-4xl font-extralight"
-              onClick={() => setSignInDialogIsOpen(true)}
+              onClick={() => setNewBarbershop(true)}
             >
               +
             </Button>
@@ -96,8 +96,8 @@ const Dashboard = () => {
         </div>
       </div>
       <Dialog
-        open={signInDialogIsOpen}
-        onOpenChange={(open) => setSignInDialogIsOpen(open)}
+        open={newBarbershop}
+        onOpenChange={(open) => setNewBarbershop(open)}
       >
         <DialogContent className="w-[90%]">
           <NewBarber />
