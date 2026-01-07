@@ -20,9 +20,10 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role   @default(USER)
+  barbershops   Barbershop[]
   accounts      Account[]
   sessions      Session[]
-  bookings     Booking[]
+  bookings      Booking[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -76,6 +77,9 @@ model Barbershop {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   services    BarbershopService[]
+
+  ownerId     String?             
+  owner       User?               @relation(fields: [ownerId], references: [id])
 }
 
 model BarbershopService {
