@@ -30,7 +30,7 @@ const Dashboard = () => {
 
         <Button
           variant="outline"
-          className="mt-3 gap-1 font-bold"
+          className="mt-4 gap-1 font-bold"
           onClick={handleLoginWithGoogleClick}
         >
           <Image
