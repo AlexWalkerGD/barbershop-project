@@ -1,3 +1,4 @@
+import Employee from "@/components/employee"
 import PhoneItem from "@/components/phone-item"
 import ServiceItem from "@/components/service-item"
 import SidebarSheet from "@/components/sidebar-sheet"
@@ -22,12 +23,14 @@ const BarbershopPage = async ({ params }: BarbershopPagesProps) => {
     },
     include: {
       services: true,
+      owner: true,
+      employees: {
+        include: { user: true },
+      },
     },
   })
 
-  if (!barbershop) {
-    return notFound()
-  }
+  if (!barbershop) return notFound()
 
   return (
     <div>
@@ -82,6 +85,35 @@ const BarbershopPage = async ({ params }: BarbershopPagesProps) => {
       <div className="space-y-2 border-b border-solid p-5">
         <h2 className="text-xs font-bold uppercase text-gray-400">Sobre nós</h2>
         <p className="text-justify text-sm">{barbershop?.description}</p>
+      </div>
+
+      {/* COLABORADORES*/}
+      <div className="flex flex-col gap-2 border-b border-solid p-5">
+        <h2 className="mb-2 text-xs font-bold uppercase text-gray-400">
+          Funcionários
+        </h2>
+        <div className="flex flex-row">
+          {/* Admin primeiro */}
+          {barbershop.owner && (
+            <Employee
+              name={barbershop.owner.name}
+              image={barbershop.owner.image}
+              role={barbershop.owner.role}
+            />
+          )}
+          {/* Colaboradores */}
+          {barbershop.employees.map((employee) => {
+            if (!employee.user) return null
+            return (
+              <Employee
+                key={employee.id}
+                name={employee.user.name}
+                image={employee.user.image}
+                role={employee.user.role}
+              />
+            )
+          })}
+        </div>
       </div>
 
       {/* SERVIÇOS */}

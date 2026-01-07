@@ -1,19 +1,79 @@
-import React from "react"
+"use client"
+
+import React, { useState } from "react"
 import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
+import { toast } from "sonner"
 
-const AddNewEmployee = () => {
+interface AddNewEmployeeProps {
+  barbershopId: string
+}
+
+const AddNewEmployee = ({ barbershopId }: AddNewEmployeeProps) => {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [image, setImage] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const handleAddEmployee = async () => {
+    if (!name) return toast.error("Nome obrigatório")
+    setLoading(true)
+
+    try {
+      const res = await fetch("/api/employees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, image, email, barbershopId }),
+      })
+      if (!res.ok) throw new Error("Erro ao criar colaborador")
+      toast.success("Colaborador adicionado com sucesso!")
+      setName("")
+      setEmail("")
+      setImage("")
+    } catch (error) {
+      console.error(error)
+      toast.error("Erro ao adicionar colaborador")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div>
       <DialogHeader>
-        <DialogTitle>Nova Barbearia</DialogTitle>
-        <DialogDescription>Descreva sua barbearia</DialogDescription>
+        <DialogTitle>Novo Colaborador</DialogTitle>
+        <DialogDescription>
+          Adicione um novo funcionário à barbearia
+        </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col gap-4 px-6 pt-4">
-        <Input type="text" placeholder="Nome" required />
-        <Input type="url" placeholder="Imagem" />
-        <Button className="mx-28">Adicionar</Button>
+        <Input
+          type="text"
+          placeholder="Nome"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <Input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Input
+          type="url"
+          placeholder="Imagem"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+        />
+        <Button
+          className="mx-28"
+          onClick={handleAddEmployee}
+          disabled={loading}
+        >
+          {loading ? "Criando..." : "Adicionar"}
+        </Button>
       </div>
     </div>
   )

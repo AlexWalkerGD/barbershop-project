@@ -9,7 +9,13 @@ import { useState } from "react"
 import AddNewEmployee from "./add-new-employee"
 
 interface BarbershopItemProps {
-  barbershop: Barbershop
+  barbershop: Barbershop & {
+    owner?: { name: string | null; image: string | null }
+    employees?: {
+      id: string
+      user?: { name: string | null; image: string | null }
+    }[]
+  }
 }
 
 const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
@@ -35,6 +41,24 @@ const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
               <p className="truncate text-sm text-gray-400">
                 {barbershop.address}
               </p>
+              {/*<div className="flex flex-row gap-2">
+                {barbershop.employees?.map((employee) => {
+                  if (!employee.user) return null
+                  return (
+                    <div key={employee.id} className="h-8 w-8">
+                      <Avatar>
+                        <AvatarImage
+                          src={employee.user.image ?? ""}
+                          alt={employee.user.name ?? "Funcionário"}
+                        />
+                        <AvatarFallback>
+                          {employee.user.name?.[0] ?? "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )
+                })}
+              </div>*/}
             </div>
             <div className="flex flex-col">
               <Button className="mt-3 w-full" asChild>
@@ -58,7 +82,7 @@ const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
         onOpenChange={(open) => setAddNewEmployee(open)}
       >
         <DialogContent className="w-[90%]">
-          <AddNewEmployee />
+          <AddNewEmployee barbershopId={barbershop.id} />
         </DialogContent>
       </Dialog>
     </div>
