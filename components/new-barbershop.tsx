@@ -7,7 +7,11 @@ import { createBarbeshop } from "@/app/_actions/create-barbershop"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
 
-const NewBarbershop = () => {
+interface NewBarbershopProps {
+  onSuccess: () => void
+}
+
+const NewBarbershop = ({ onSuccess }: NewBarbershopProps) => {
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
   const [description, setDescription] = useState("")
@@ -54,11 +58,13 @@ const NewBarbershop = () => {
       toast.success("Barbearia criada com sucesso!")
 
       handleResetInputs()
+      onSuccess()
     } catch (error) {
       console.error(error)
       toast.error("Erro ao criar barbearia")
     }
   }
+
   return (
     <div>
       <DialogHeader>

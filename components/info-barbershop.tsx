@@ -16,9 +16,10 @@ interface BarbershopItemProps {
       user?: { name: string | null; image: string | null }
     }[]
   }
+  onSuccess: () => void
 }
 
-const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
+const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [addNewEmployee, setAddNewEmployee] = useState(false)
   return (
     <div>
@@ -38,7 +39,7 @@ const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
           <div className="flex w-full flex-row items-center justify-between px-1">
             <div>
               <h3 className="truncate font-semibold">{barbershop.name}</h3>
-              <p className="truncate text-sm text-gray-400">
+              <p className="line-clamp-2 text-sm text-gray-400">
                 {barbershop.address}
               </p>
               {/*<div className="flex flex-row gap-2">
@@ -61,6 +62,13 @@ const InfoBarbershop = ({ barbershop }: BarbershopItemProps) => {
               </div>*/}
             </div>
             <div className="flex flex-col">
+              <Button
+                className="mt-3 w-full"
+                variant="destructive"
+                onClick={() => onSuccess()}
+              >
+                X
+              </Button>
               <Button className="mt-3 w-full" asChild>
                 <Link href={`/barbershops/${barbershop.id}`}>Ver horários</Link>
               </Button>

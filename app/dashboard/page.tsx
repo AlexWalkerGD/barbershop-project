@@ -15,6 +15,9 @@ import Image from "next/image"
 import InfoBarber from "@/components/info-barbershop"
 import NewBarber from "@/components/new-barbershop"
 import { DialogContent } from "@/components/ui/dialog"
+import { DialogTrigger } from "@radix-ui/react-dialog"
+import { deleteBarbershop } from "../_actions/delete-barbershop"
+import { toast } from "sonner"
 
 interface Barbershop {
   id: string
@@ -28,6 +31,26 @@ const Dashboard = () => {
   const [newBarbershop, setNewBarbershop] = useState(false)
   const handleLoginWithGoogleClick = () => signIn("google")
   const { data: session } = useSession()
+
+  const handleSuccess = async () => {
+    setNewBarbershop(false)
+    if (!session) return
+    const res = await fetch("/api/barbershops")
+    const data = await res.json()
+    setBarbershops(data)
+  }
+
+  const handleDeleteBarbershop = async (barbershopsId: string) => {
+    try {
+      await deleteBarbershop(barbershopsId)
+      toast.success("Barbearia excluída com sucesso")
+      setBarbershops((prev) => prev.filter((b) => b.id !== barbershopsId))
+    } catch (error) {
+      console.error(error)
+      console.log(barbershopsId)
+      toast.error("Erro ao excluir barbearia. Tente novamente.")
+    }
+  }
 
   useEffect(() => {
     if (!session) return
@@ -76,12 +99,22 @@ const Dashboard = () => {
               <h1 className="text-xl font-bold">Dashboard</h1>
               <h4 className="font-semibold">Olá, Alex Walker</h4>
             </div>
-            <Button
-              className="mt-3 p-[10px] pb-4 text-4xl font-extralight"
-              onClick={() => setNewBarbershop(true)}
+            <Dialog
+              open={newBarbershop}
+              onOpenChange={(open) => setNewBarbershop(open)}
             >
-              +
-            </Button>
+              <DialogTrigger asChild>
+                <Button
+                  className="mt-3 p-[10px] pb-4 text-4xl font-extralight"
+                  onClick={() => setNewBarbershop(true)}
+                >
+                  +
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-[90%]">
+                <NewBarber onSuccess={handleSuccess} />
+              </DialogContent>
+            </Dialog>
           </div>
           <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-gray-400">
             Minhas barbearias
@@ -90,19 +123,15 @@ const Dashboard = () => {
           <div className="flex flex-col items-center justify-center gap-5 pt-5">
             {barbershops.length === 0 && <p>Você não tem barbearias.</p>}
             {barbershops.map((b) => (
-              <InfoBarber key={b.id} barbershop={b} />
+              <InfoBarber
+                key={b.id}
+                barbershop={b}
+                onSuccess={() => handleDeleteBarbershop(b.id)}
+              />
             ))}
           </div>
         </div>
       </div>
-      <Dialog
-        open={newBarbershop}
-        onOpenChange={(open) => setNewBarbershop(open)}
-      >
-        <DialogContent className="w-[90%]">
-          <NewBarber />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
