@@ -82,7 +82,7 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
               </Dialog>
 
               <Button className="mt-3 w-full" asChild>
-                <Link href={`/barbershops/${barbershop.id}`}>Ver horários</Link>
+                <Link href={`/schedules/${barbershop.id}`}>Ver horários</Link>
               </Button>
               <Button
                 variant="secondary"

@@ -19,6 +19,13 @@ export const createBooking = async ({
   if (!user) {
     throw new Error("Usuário não autenticado")
   }
+  console.log("Criando booking:", {
+    userId: user.user.id,
+    serviceId,
+    employeeId,
+    date,
+  })
+
   await db.booking.create({
     data: {
       serviceId,
