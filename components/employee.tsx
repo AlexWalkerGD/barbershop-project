@@ -1,24 +1,29 @@
 "use client"
 
-import React from "react"
-import { Avatar, AvatarImage } from "./ui/avatar"
-
 interface EmployeeProps {
-  name?: string | null
-  image?: string | null
-  role?: string | null
+  employee: {
+    id: string
+    name: string | null
+    image: string | null
+    role: "EMPLOYEE"
+  }
+  isSelected: boolean
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  onSelect: (employee: any) => void
 }
 
-const Employee = ({ name, image, role }: EmployeeProps) => {
+const Employee = ({ employee, isSelected, onSelect }: EmployeeProps) => {
   return (
-    <div className="flex w-24 flex-col items-center pt-2">
-      <div className="relative h-[45px] w-[45px]">
-        <Avatar>
-          <AvatarImage src={image ?? "logo.png"} alt={name ?? "Sem nome"} />
-        </Avatar>
-      </div>
-      <h2 className="text-md truncate text-center">{name ?? "Sem nome"}</h2>
-      <h2 className="text-[10px] font-bold">{role}</h2>
+    <div
+      onClick={() => onSelect(employee)}
+      className={`flex w-24 cursor-pointer flex-col items-center rounded-md p-2 ${isSelected ? "ring-2 ring-primary" : "hover:bg-muted"} `}
+    >
+      <img
+        src={employee.image ?? "/avatar.png"}
+        className="h-12 w-12 rounded-full"
+      />
+
+      <span className="mt-1 text-center text-sm">{employee.name}</span>
     </div>
   )
 }

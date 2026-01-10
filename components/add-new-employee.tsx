@@ -8,9 +8,10 @@ import { toast } from "sonner"
 
 interface AddNewEmployeeProps {
   barbershopId: string
+  onSuccess: () => void
 }
 
-const AddNewEmployee = ({ barbershopId }: AddNewEmployeeProps) => {
+const AddNewEmployee = ({ onSuccess, barbershopId }: AddNewEmployeeProps) => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [image, setImage] = useState("")
@@ -31,6 +32,7 @@ const AddNewEmployee = ({ barbershopId }: AddNewEmployeeProps) => {
       setName("")
       setEmail("")
       setImage("")
+      onSuccess()
     } catch (error) {
       console.error(error)
       toast.error("Erro ao adicionar colaborador")

@@ -6,16 +6,25 @@ import { getServerSession } from "next-auth"
 
 interface CreateBookingParams {
   serviceId: string
+  employeeId: string
   date: Date
 }
 
-export const createBooking = async (params: CreateBookingParams) => {
+export const createBooking = async ({
+  serviceId,
+  employeeId,
+  date,
+}: CreateBookingParams) => {
   const user = await getServerSession(authOptions)
   if (!user) {
     throw new Error("Usuário não autenticado")
   }
   await db.booking.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { ...params, userId: (user.user as any).id },
+    data: {
+      serviceId,
+      employeeId,
+      date,
+      userId: user.user.id,
+    },
   })
 }

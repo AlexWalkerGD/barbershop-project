@@ -8,17 +8,26 @@ interface CreateBookingParams {
   name: string
   description: string
   address: string
-  phones: string
+  phones: string[]
   imageUrl: string
 }
 
 export const createBarbeshop = async (params: CreateBookingParams) => {
-  const user = await getServerSession(authOptions)
-  if (!user) {
+  const session = await getServerSession(authOptions)
+  if (!session) {
     throw new Error("Usuário não autenticado")
   }
-  await db.barbershop.create({
+  const ownerId = session.user.id
+  const newBarbershop = await db.barbershop.create({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { ...params, ownerId: (user.user as any).id },
+    data: { ...params, ownerId },
   })
+
+  await db.barbershopEmployee.create({
+    data: {
+      barbershopId: newBarbershop.id,
+      userId: ownerId,
+    },
+  })
+  return newBarbershop
 }

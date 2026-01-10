@@ -20,7 +20,8 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role   @default(USER)
-  barbershops   Barbershop[]
+  barbershopsOwned    Barbershop[]           @relation("Owner")
+  barbershopEmployee  BarbershopEmployee[]   // Relação de funcionário
   accounts      Account[]
   sessions      Session[]
   bookings      Booking[]
@@ -77,9 +78,10 @@ model Barbershop {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   services    BarbershopService[]
+  employees   BarbershopEmployee[]  
 
   ownerId     String?             
-  owner       User?               @relation(fields: [ownerId], references: [id])
+  owner       User?               @relation("Owner", fields: [ownerId], references: [id])
 }
 
 model BarbershopService {
@@ -99,7 +101,19 @@ model Booking {
   user      User              @relation(fields: [userId], references: [id])
   serviceId String
   service   BarbershopService @relation(fields: [serviceId], references: [id])
+  employeeId  String
+  employee  BarbershopEmployee  @relation(fields: [employeeId], references: [id])  
   date      DateTime
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+}
+
+model BarbershopEmployee {
+  id           String      @id @default(cuid())
+  barbershopId String
+  barbershop   Barbershop  @relation(fields: [barbershopId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now())
+  bookings     Booking[]
 }

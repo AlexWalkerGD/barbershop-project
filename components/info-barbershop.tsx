@@ -1,26 +1,28 @@
-import { Barbershop } from "@prisma/client"
 import { Card, CardContent } from "./ui/card"
 import Image from "next/image"
 import { Button } from "./ui/button"
 import Link from "next/link"
-import { Dialog } from "@/components/ui/dialog"
+import { BarbershopItemProps } from "@/lib/barbershop"
+import {
+  Dialog,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { DialogContent } from "@/components/ui/dialog"
 import { useState } from "react"
 import AddNewEmployee from "./add-new-employee"
 
-interface BarbershopItemProps {
-  barbershop: Barbershop & {
-    owner?: { name: string | null; image: string | null }
-    employees?: {
-      id: string
-      user?: { name: string | null; image: string | null }
-    }[]
-  }
-  onSuccess: () => void
-}
-
 const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [addNewEmployee, setAddNewEmployee] = useState(false)
+
+  const handleSuccess = async () => {
+    setAddNewEmployee(false)
+  }
+
   return (
     <div>
       <Card className="min-w-[460px] rounded-2xl">
@@ -42,33 +44,43 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
               <p className="line-clamp-2 text-sm text-gray-400">
                 {barbershop.address}
               </p>
-              {/*<div className="flex flex-row gap-2">
-                {barbershop.employees?.map((employee) => {
-                  if (!employee.user) return null
-                  return (
-                    <div key={employee.id} className="h-8 w-8">
-                      <Avatar>
-                        <AvatarImage
-                          src={employee.user.image ?? ""}
-                          alt={employee.user.name ?? "Funcionário"}
-                        />
-                        <AvatarFallback>
-                          {employee.user.name?.[0] ?? "?"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  )
-                })}
-              </div>*/}
+              <div className="flex flex-row gap-2">
+                <div className="h-8 w-8"></div>
+              </div>
             </div>
             <div className="flex flex-col">
-              <Button
-                className="mt-3 w-full"
-                variant="destructive"
-                onClick={() => onSuccess()}
-              >
-                X
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild className="w-full">
+                  <Button className="mt-3 w-full" variant="destructive">
+                    X
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[90%]">
+                  <DialogHeader>
+                    <DialogTitle>Você quer excluir sua barbearia?</DialogTitle>
+                    <DialogDescription>
+                      Tem certeza que deseja exluir? Essa ação é irreversível.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="flex flex-row gap-3">
+                    <DialogClose asChild>
+                      <Button variant="secondary" className="w-full">
+                        Não
+                      </Button>
+                    </DialogClose>
+                    <DialogClose className="w-full">
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={() => onSuccess()}
+                      >
+                        Sim, Excluir.
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               <Button className="mt-3 w-full" asChild>
                 <Link href={`/barbershops/${barbershop.id}`}>Ver horários</Link>
               </Button>
@@ -90,7 +102,10 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         onOpenChange={(open) => setAddNewEmployee(open)}
       >
         <DialogContent className="w-[90%]">
-          <AddNewEmployee barbershopId={barbershop.id} />
+          <AddNewEmployee
+            barbershopId={barbershop.id}
+            onSuccess={handleSuccess}
+          />
         </DialogContent>
       </Dialog>
     </div>

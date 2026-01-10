@@ -1,6 +1,6 @@
 "use client"
 
-import { Barbershop, BarbershopService, Booking } from "@prisma/client"
+import { Barbershop, BarbershopService, Booking, User } from "@prisma/client"
 import Image from "next/image"
 import { Button } from "./ui/button"
 import { Card, CardContent } from "./ui/card"
@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation"
 interface ServiceItemProps {
   service: BarbershopService
   barbershop: Pick<Barbershop, "name">
+  employee: User
 }
 
 const TIME_LIST = [
@@ -75,7 +76,7 @@ const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
   })
 }
 
-const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
+const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   const router = useRouter()
   const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
   const { data } = useSession()
@@ -107,9 +108,14 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
   }, [selectedDay, selectedTime])
 
   const handleBookingClick = () => {
+    if (!employee) {
+      toast.error("Selecione um funcionário")
+      return
+    }
     if (data?.user) {
       return setBookingSheetIsOpen(true)
     }
+
     return setSignInDialogIsOpen(true)
   }
 
@@ -135,6 +141,7 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
       await createBooking({
         serviceId: service.id,
         date: selectedDate,
+        employeeId: employee.id,
       })
       handleBookingSheetOpenChange()
       toast.success("Reserva criada com sucesso!", {

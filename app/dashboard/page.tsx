@@ -17,17 +17,11 @@ import NewBarber from "@/components/new-barbershop"
 import { DialogContent } from "@/components/ui/dialog"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import { deleteBarbershop } from "../_actions/delete-barbershop"
+import { BarbershopWithRelations } from "@/lib/barbershop"
 import { toast } from "sonner"
 
-interface Barbershop {
-  id: string
-  name: string
-  address: string
-  services?: { id: string; name: string; price: number }[]
-}
-
 const Dashboard = () => {
-  const [barbershops, setBarbershops] = useState<Barbershop[]>([])
+  const [barbershops, setBarbershops] = useState<BarbershopWithRelations[]>([])
   const [newBarbershop, setNewBarbershop] = useState(false)
   const handleLoginWithGoogleClick = () => signIn("google")
   const { data: session } = useSession()
