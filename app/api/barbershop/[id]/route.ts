@@ -48,30 +48,6 @@ export async function GET(
   // Transformar os dados para o formato do front
   const employees = []
 
-  // Admin como employee
-  if (barbershop.owner) {
-    const adminBookings = await db.booking.findMany({
-      where: {
-        employeeId: barbershop.owner.id,
-        date: {
-          gte: startOfDay(selectedDate),
-          lte: endOfDay(selectedDate),
-        },
-      },
-      include: { user: true, service: true }, // incluído service
-    })
-    employees.push({
-      id: barbershop.owner.id,
-      name: barbershop.owner.name,
-      bookings: adminBookings.map((b) => ({
-        id: b.id,
-        date: b.date,
-        userName: b.user?.name ?? "Cliente",
-        serviceName: b.service?.name ?? "Serviço",
-      })),
-    })
-  }
-
   // Colaboradores
   for (const emp of barbershop.employees) {
     employees.push({

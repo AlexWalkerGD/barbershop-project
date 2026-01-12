@@ -7,6 +7,9 @@ import Header from "@/components/header"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
+import { DialogContent, Dialog } from "@/components/ui/dialog"
+import { DialogTrigger } from "@radix-ui/react-dialog"
+import NewBooking from "@/components/new-booking"
 
 const TIME_LIST = [
   "08:00",
@@ -50,6 +53,9 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [calendarSheetIsOpen, setCalendarSheetIsOpen] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<any | null>(null)
+  const [newBooking, setNewBooking] = useState(false)
 
   useEffect(() => {
     if (!params.id || !selectedDate) return
@@ -99,86 +105,105 @@ export default function Schedules({ params }: { params: { id: string } }) {
                 <h1 className="text-xl font-bold">Dashboard</h1>
                 <h4 className="font-semibold">Olá, Alex Walker</h4>
               </div>
+              <Dialog
+                open={newBooking}
+                onOpenChange={(open) => setNewBooking(open)}
+              >
+                <DialogTrigger asChild>
+                  <Button className="mt-3 p-[10px] pb-4 text-4xl font-extralight">
+                    +
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[90%]">
+                  <NewBooking />
+                </DialogContent>
+              </Dialog>
             </div>
             <h2 className="mt-10 text-xs font-bold uppercase text-gray-400">
               {barbershop?.name}
             </h2>
-            <div className="flex flex-row items-center justify-between">
-              <div className="flex flex-row gap-4">
-                <div
-                  className={
-                    "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-6 ring-2 ring-secondary"
-                  }
-                >
-                  <div className="relative inline-block">
-                    <Button
-                      className="bg-transparent"
-                      size="sm"
-                      onClick={handleBookingClick}
-                    >
-                      {capitalized}
-                    </Button>
+            <div className="flex flex-row justify-between gap-4">
+              <div
+                className={
+                  "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-6 ring-2 ring-secondary"
+                }
+              >
+                <div className="relative inline-block">
+                  <Button
+                    className="bg-transparent hover:bg-transparent"
+                    size="sm"
+                    onClick={handleBookingClick}
+                  >
+                    {capitalized}
+                  </Button>
 
-                    {calendarSheetIsOpen && (
-                      <div className="absolute z-50 mt-2 border border-secondary">
-                        <Calendar
-                          mode="single"
-                          locale={ptBR}
-                          required
-                          selected={selectedDate}
-                          onSelect={handleDateSelect}
-                          disabled={{ before: new Date() }}
-                          styles={{
-                            head_cell: {
-                              width: "100%",
-                            },
-                            cell: {
-                              width: "100%",
-                            },
-                            button: {
-                              width: "100%",
-                            },
-                            nav_button_previous: {
-                              width: "32px",
-                              height: "32px",
-                            },
-                            nav_button_next: {
-                              width: "32px",
-                              height: "32px",
-                            },
-                            caption: {
-                              textTransform: "capitalize",
-                            },
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
+                  {calendarSheetIsOpen && (
+                    <div className="absolute left-[-25px] z-50 mt-1 border border-secondary">
+                      <Calendar
+                        mode="single"
+                        locale={ptBR}
+                        required
+                        selected={selectedDate}
+                        onSelect={handleDateSelect}
+                        disabled={{ before: new Date() }}
+                        styles={{
+                          head_cell: {
+                            width: "100%",
+                          },
+                          cell: {
+                            width: "100%",
+                          },
+                          button: {
+                            width: "100%",
+                          },
+                          nav_button_previous: {
+                            width: "32px",
+                            height: "32px",
+                          },
+                          nav_button_next: {
+                            width: "32px",
+                            height: "32px",
+                          },
+                          caption: {
+                            textTransform: "capitalize",
+                          },
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="flex flex-row gap-4">
-                <select
-                  value={selectedEmployee?.id}
-                  onChange={(e) => {
-                    const employee = barbershop.employees.find(
-                      (emp: any) => emp.id === e.target.value,
-                    )
-                    if (employee) setSelectedEmployee(employee)
-                  }}
-                  className="my-7 flex cursor-pointer rounded-2xl bg-transparent px-5 py-2 text-sm font-semibold ring-2 ring-secondary"
+              <div className="relative my-7 flex cursor-pointer flex-col items-center justify-center rounded-2xl px-6 font-medium ring-2 ring-secondary">
+                <button
+                  className="bg-transparent text-center text-[15px] hover:bg-transparent"
+                  onClick={() => setOpen(!open)}
                 >
-                  <option value="">{selectedEmployee.id[0]}</option>
-                  {barbershop.employees.map((emp: any) => (
-                    <option
-                      className={`bg-secondary hover:border-gray-900`}
-                      key={emp.id}
-                      value={emp.id}
-                    >
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
+                  {selected?.name ? (
+                    `De: ${selected?.name}`
+                  ) : (
+                    <div>{`De: ${selectedEmployee.name}`}</div>
+                  )}
+                </button>
+
+                {open && (
+                  <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
+                    {barbershop.employees.map((opt) => (
+                      <div
+                        key={opt}
+                        className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
+                        onClick={() => {
+                          setSelected(opt)
+                          setSelectedEmployee(opt)
+                          setOpen(false)
+                        }}
+                      >
+                        {opt.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+              <div></div>
             </div>
             <div
               className={
