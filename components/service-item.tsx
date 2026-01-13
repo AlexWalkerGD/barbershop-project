@@ -93,11 +93,12 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
       const bookings = await getBookings({
         date: selectedDay,
         serviceId: service.id,
+        employeeId: employee.id,
       })
       setDayBookings(bookings)
     }
     fetch()
-  }, [selectedDay, service.id])
+  }, [selectedDay, service.id, employee.id])
 
   const selectedDate = useMemo(() => {
     if (!selectedDay || !selectedTime) return
