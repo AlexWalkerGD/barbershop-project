@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import {
   Dialog,
   DialogHeader,
@@ -11,10 +11,11 @@ import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
-import { Barbershop } from "@prisma/client"
+import { Barbershop, Booking } from "@prisma/client"
 import { createBooking } from "@/app/_actions/create-booking"
 import { toast } from "sonner"
-import { set } from "date-fns"
+import { isPast, isToday, set } from "date-fns"
+import { getBookings } from "@/app/_actions/get_bookings"
 
 interface Employee {
   id: string
@@ -55,6 +56,33 @@ const TIME_LIST = [
   "15:00",
 ]
 
+interface GetTimeListProps {
+  bookings: Booking[]
+  selectedDay: Date
+}
+
+const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
+  return TIME_LIST.filter((time) => {
+    const hour = Number(time.split(":")[0])
+    const minutes = Number(time.split(":")[1])
+
+    const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }))
+    if (timeIsOnThePast && isToday(selectedDay)) {
+      return false
+    }
+
+    const hasBookingOnCurrentTime = bookings.some(
+      (booking) =>
+        booking.date.getHours() === hour &&
+        booking.date.getMinutes() === minutes,
+    )
+    if (hasBookingOnCurrentTime) {
+      return false
+    }
+    return true
+  })
+}
+
 const NewBooking = ({
   employee,
   barbershop,
@@ -68,6 +96,7 @@ const NewBooking = ({
   const [selectedService, setSelectedService] = useState<any>(null)
   const [employeeSelectOpen, setEmployeeSelectOpen] = useState(false)
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
   )
@@ -102,6 +131,23 @@ const NewBooking = ({
     }
   }
 
+  useEffect(() => {
+    const fetch = async () => {
+      if (!selectedDay) return
+      const bookings = await getBookings({
+        date: selectedDay,
+        employeeId: selectedEmployee.id,
+      })
+      setBookings(bookings)
+    }
+    fetch()
+  }, [selectedDay, selectedEmployee])
+
+  const timeList = useMemo(() => {
+    if (!selectedDay) return []
+    return getTimeList({ bookings: bookings, selectedDay })
+  }, [bookings, selectedDay])
+
   return (
     <Dialog>
       <div className="flex w-full max-w-full flex-col gap-2 overflow-x-auto p-2 [&::-webkit-scrollbar]:hidden">
@@ -123,6 +169,35 @@ const NewBooking = ({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+
+          <h2 className="text-sm text-[#94A3B8]">Escolha um funcionário</h2>
+
+          <div className="relative inline-block">
+            <Button
+              className="bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
+              size="sm"
+              onClick={() => setEmployeeSelectOpen(!employeeSelectOpen)}
+            >
+              {selectedEmployee?.name ?? employee.name}
+            </Button>
+
+            {employeeSelectOpen && (
+              <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
+                {barbershop?.employees.map((opt) => (
+                  <div
+                    key={opt.id}
+                    className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
+                    onClick={() => {
+                      setSelectedEmployee(opt)
+                      setEmployeeSelectOpen(false)
+                    }}
+                  >
+                    {opt.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <h2 className="text-sm text-[#94A3B8]">Selecione a data</h2>
 
@@ -158,54 +233,26 @@ const NewBooking = ({
               }}
             />
           </div>
-
-          <div className="flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
-            {TIME_LIST.length > 0 ? (
-              TIME_LIST.map((time) => (
-                <Button
-                  key={time}
-                  variant={selectedTime === time ? "default" : "outline"}
-                  className="shrink-0 rounded-full"
-                  onClick={() => setSelectedTime(time)}
-                >
-                  {time}
-                </Button>
-              ))
-            ) : (
-              <p className="text-xs">
-                Não há horários disponíveis para este dia.
-              </p>
-            )}
-          </div>
-
-          <h2 className="text-sm text-[#94A3B8]">Escolha um funcionário</h2>
-
-          <div className="relative inline-block">
-            <Button
-              className="bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
-              size="sm"
-              onClick={() => setEmployeeSelectOpen(!employeeSelectOpen)}
-            >
-              {selectedEmployee?.name ?? employee.name}
-            </Button>
-
-            {employeeSelectOpen && (
-              <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
-                {barbershop?.employees.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
-                    onClick={() => {
-                      setSelectedEmployee(opt)
-                      setEmployeeSelectOpen(false)
-                    }}
+          {selectedEmployee && selectedDay && (
+            <div className="flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
+              {timeList.length > 0 ? (
+                timeList.map((time) => (
+                  <Button
+                    key={time}
+                    variant={selectedTime === time ? "default" : "outline"}
+                    className="shrink-0 rounded-full"
+                    onClick={() => setSelectedTime(time)}
                   >
-                    {opt.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                    {time}
+                  </Button>
+                ))
+              ) : (
+                <p className="text-xs">
+                  Não há horários disponíveis para este dia.
+                </p>
+              )}
+            </div>
+          )}
 
           <h2 className="text-sm text-[#94A3B8]">Escolha um serviço</h2>
 
@@ -234,7 +281,11 @@ const NewBooking = ({
               </div>
             )}
           </div>
-          <Button className="mt-4" onClick={handleCreateBooking}>
+          <Button
+            className="mt-4"
+            onClick={handleCreateBooking}
+            disabled={!selectedEmployee || !selectedDay || !selectedTime}
+          >
             Adicionar
           </Button>
         </div>
