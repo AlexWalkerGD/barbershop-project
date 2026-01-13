@@ -8,6 +8,10 @@ export const deleteBarbershop = async (barbershopsId: string) => {
     where: { barbershopId: barbershopsId },
   })
 
+  await db.barbershopEmployee.deleteMany({
+    where: { barbershopId: barbershopsId },
+  })
+
   await db.barbershop.delete({
     where: {
       id: barbershopsId,

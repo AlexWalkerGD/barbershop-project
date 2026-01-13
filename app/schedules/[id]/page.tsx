@@ -42,10 +42,16 @@ interface Employee {
   bookings: Booking[]
 }
 
+interface Services {
+  id: string
+  name: string
+}
+
 interface Barbershop {
   id: string
   name: string
   employees: Employee[]
+  services: Services[]
 }
 
 export default function Schedules({ params }: { params: { id: string } }) {
@@ -56,6 +62,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<any | null>(null)
   const [newBooking, setNewBooking] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     if (!params.id || !selectedDate) return
@@ -70,7 +77,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
         }
       })
       .catch((err) => console.error("Erro ao buscar barbershop:", err))
-  }, [params.id, selectedDate])
+  }, [params.id, selectedDate, refreshKey])
 
   if (!barbershop || !selectedEmployee) return <div>Carregando...</div>
 
@@ -79,6 +86,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
     (b: any) =>
       format(new Date(b.date), "yyyy-MM-dd") ===
       format(selectedDate, "yyyy-MM-dd"),
+    console.log(selectedEmployee.bookings),
   )
 
   const handleBookingClick = () => {
@@ -88,6 +96,11 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date)
     setCalendarSheetIsOpen(false)
+  }
+
+  const handleSuccess = () => {
+    setNewBooking(false)
+    setRefreshKey((prev) => prev + 1)
   }
 
   const formattedDate = format(selectedDate, "EEEE, dd MMM", { locale: ptBR })
@@ -115,147 +128,156 @@ export default function Schedules({ params }: { params: { id: string } }) {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="w-[90%]">
-                  <NewBooking />
+                  {barbershop && (
+                    <NewBooking
+                      barbershop={barbershop}
+                      employee={selectedEmployee}
+                      services={barbershop.services[0]}
+                      onSuccess={handleSuccess}
+                    />
+                  )}
                 </DialogContent>
               </Dialog>
             </div>
-            <h2 className="mt-10 text-xs font-bold uppercase text-gray-400">
-              {barbershop?.name}
-            </h2>
-            <div className="flex flex-row justify-between gap-4">
-              <div
-                className={
-                  "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-6 ring-2 ring-secondary"
-                }
-              >
-                <div className="relative inline-block">
-                  <Button
-                    className="bg-transparent hover:bg-transparent"
-                    size="sm"
-                    onClick={handleBookingClick}
-                  >
-                    {capitalized}
-                  </Button>
+            <div key={refreshKey}>
+              <h2 className="mt-10 text-xs font-bold uppercase text-gray-400">
+                {barbershop?.name}
+              </h2>
+              <div className="flex flex-row justify-between gap-4">
+                <div
+                  className={
+                    "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-6 ring-2 ring-secondary"
+                  }
+                >
+                  <div className="relative inline-block">
+                    <Button
+                      className="bg-transparent hover:bg-transparent"
+                      size="sm"
+                      onClick={handleBookingClick}
+                    >
+                      {capitalized}
+                    </Button>
 
-                  {calendarSheetIsOpen && (
-                    <div className="absolute left-[-25px] z-50 mt-1 border border-secondary">
-                      <Calendar
-                        mode="single"
-                        locale={ptBR}
-                        required
-                        selected={selectedDate}
-                        onSelect={handleDateSelect}
-                        disabled={{ before: new Date() }}
-                        styles={{
-                          head_cell: {
-                            width: "100%",
-                          },
-                          cell: {
-                            width: "100%",
-                          },
-                          button: {
-                            width: "100%",
-                          },
-                          nav_button_previous: {
-                            width: "32px",
-                            height: "32px",
-                          },
-                          nav_button_next: {
-                            width: "32px",
-                            height: "32px",
-                          },
-                          caption: {
-                            textTransform: "capitalize",
-                          },
-                        }}
-                      />
+                    {calendarSheetIsOpen && (
+                      <div className="absolute left-[-25px] z-50 mt-1 border border-secondary">
+                        <Calendar
+                          mode="single"
+                          locale={ptBR}
+                          required
+                          selected={selectedDate}
+                          onSelect={handleDateSelect}
+                          disabled={{ before: new Date() }}
+                          styles={{
+                            head_cell: {
+                              width: "100%",
+                            },
+                            cell: {
+                              width: "100%",
+                            },
+                            button: {
+                              width: "100%",
+                            },
+                            nav_button_previous: {
+                              width: "32px",
+                              height: "32px",
+                            },
+                            nav_button_next: {
+                              width: "32px",
+                              height: "32px",
+                            },
+                            caption: {
+                              textTransform: "capitalize",
+                            },
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="relative my-7 flex cursor-pointer flex-col items-center justify-center rounded-2xl px-6 font-medium ring-2 ring-secondary">
+                  <button
+                    className="bg-transparent text-center text-[15px] hover:bg-transparent"
+                    onClick={() => setOpen(!open)}
+                  >
+                    {selected?.name ? (
+                      `De: ${selected?.name}`
+                    ) : (
+                      <div>{`De: ${selectedEmployee.name}`}</div>
+                    )}
+                  </button>
+
+                  {open && (
+                    <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
+                      {barbershop.employees.map((opt) => (
+                        <div
+                          key={opt.id}
+                          className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
+                          onClick={() => {
+                            setSelected(opt)
+                            setSelectedEmployee(opt)
+                            setOpen(false)
+                          }}
+                        >
+                          {opt.name}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
+                <div></div>
               </div>
-              <div className="relative my-7 flex cursor-pointer flex-col items-center justify-center rounded-2xl px-6 font-medium ring-2 ring-secondary">
-                <button
-                  className="bg-transparent text-center text-[15px] hover:bg-transparent"
-                  onClick={() => setOpen(!open)}
-                >
-                  {selected?.name ? (
-                    `De: ${selected?.name}`
-                  ) : (
-                    <div>{`De: ${selectedEmployee.name}`}</div>
-                  )}
-                </button>
-
-                {open && (
-                  <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
-                    {barbershop.employees.map((opt) => (
+              <div
+                className={
+                  "flex cursor-pointer flex-row gap-5 rounded-2xl bg-card pl-6 ring-2 ring-secondary"
+                }
+              >
+                <div className="flex flex-col">
+                  {TIME_LIST.map((time) => {
+                    return (
                       <div
-                        key={opt}
-                        className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
-                        onClick={() => {
-                          setSelected(opt)
-                          setSelectedEmployee(opt)
-                          setOpen(false)
-                        }}
+                        key={time}
+                        className="h-[70px] pt-2 font-semibold text-gray-400"
                       >
-                        {opt.name}
+                        <div>{time}</div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div></div>
-            </div>
-            <div
-              className={
-                "flex cursor-pointer flex-row gap-5 rounded-2xl bg-card pl-6 ring-2 ring-secondary"
-              }
-            >
-              <div className="flex flex-col">
-                {TIME_LIST.map((time) => {
-                  return (
-                    <div
-                      key={time}
-                      className="h-[70px] pt-2 font-semibold text-gray-400"
-                    >
-                      <div>{time}</div>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="flex w-full flex-col">
-                {TIME_LIST.map((time) => {
-                  const booking = bookingsToday.find(
-                    (b: any) => format(new Date(b.date), "HH:mm") === time,
-                  )
+                    )
+                  })}
+                </div>
+                <div className="flex w-full flex-col">
+                  {TIME_LIST.map((time) => {
+                    const booking = bookingsToday.find(
+                      (b: any) => format(new Date(b.date), "HH:mm") === time,
+                    )
 
-                  return (
-                    <div
-                      key={time}
-                      className="rounded-br-xl rounded-tr-xl ring-2 ring-secondary"
-                    >
+                    return (
                       <div
-                        className={`flex h-[70px] flex-col justify-center p-2 pl-2 text-xs ${
-                          booking
-                            ? "w-44 bg-primary ring-2 ring-secondary"
-                            : "cursor-pointer"
-                        }`}
+                        key={time}
+                        className="rounded-br-xl rounded-tr-xl ring-2 ring-secondary"
                       >
-                        {booking ? (
-                          <>
-                            <div className="text-[14px]">
-                              {booking.userName}
-                            </div>
-                            <div className="text-[12px] text-white">
-                              {booking.serviceName}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-[12px] text-white"></div>
-                        )}
+                        <div
+                          className={`flex h-[70px] flex-col justify-center p-2 pl-2 text-xs ${
+                            booking
+                              ? "w-44 bg-primary ring-2 ring-secondary"
+                              : "cursor-pointer"
+                          }`}
+                        >
+                          {booking ? (
+                            <>
+                              <div className="text-[14px]">
+                                {booking.userName}
+                              </div>
+                              <div className="text-[12px] text-white">
+                                {booking.serviceName}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-[12px] text-white"></div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>

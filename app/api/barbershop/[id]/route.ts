@@ -13,8 +13,6 @@ export async function GET(
       { error: "Barbershop id required" },
       { status: 400 },
     )
-
-  // Pega a data da query string do front
   const selectedDateStr = req.nextUrl.searchParams.get("date")
   const selectedDate = selectedDateStr ? new Date(selectedDateStr) : new Date()
 
@@ -34,21 +32,21 @@ export async function GET(
             },
             include: {
               user: true,
-              service: true, // adicionado
+              service: true,
             },
           },
         },
       },
+      services: true,
     },
   })
 
   if (!barbershop)
     return NextResponse.json({ error: "Barbershop not found" }, { status: 404 })
 
-  // Transformar os dados para o formato do front
   const employees = []
 
-  // Colaboradores
+  // Employees
   for (const emp of barbershop.employees) {
     employees.push({
       id: emp.id,
@@ -62,9 +60,16 @@ export async function GET(
     })
   }
 
+  // Services
+  const services = barbershop.services.map((s) => ({
+    id: s.id,
+    name: s.name,
+  }))
+
   return NextResponse.json({
     id: barbershop.id,
     name: barbershop.name,
     employees,
+    services,
   })
 }
