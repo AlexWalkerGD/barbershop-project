@@ -21,8 +21,10 @@ import { Card } from "./ui/card"
 import { deleteEmployee } from "@/app/_actions/delete.employee"
 import { toast } from "sonner"
 import { deleteService } from "@/app/_actions/delete.service"
+import EditBarbershop from "./edit-barbershop"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
+  const [editBarbershop, setEditBarbershop] = useState(false)
   const [addNewEmployee, setAddNewEmployee] = useState(false)
   const [addNewService, setAddNewService] = useState(false)
 
@@ -34,6 +36,9 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
     setAddNewService(false)
   }
 
+  const handleSuccess = async () => {
+    setEditBarbershop(false)
+  }
   const handleDeleteEmployee = async (employeeId: string) => {
     try {
       await deleteEmployee(employeeId)
@@ -71,7 +76,11 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
             </p>
           </div>
         </div>
-        <Button>
+        <Button
+          onClick={() => {
+            setEditBarbershop(true)
+          }}
+        >
           <MdModeEdit size={18} />
         </Button>
       </div>
@@ -239,6 +248,15 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       </Dialog>
 
       <Dialog
+        open={editBarbershop}
+        onOpenChange={(open) => setEditBarbershop(open)}
+      >
+        <DialogContent className="w-[90%]">
+          <EditBarbershop barbershop={barbershop} onSuccess={handleSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
         open={addNewEmployee}
         onOpenChange={(open) => setAddNewEmployee(open)}
       >
@@ -249,6 +267,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           />
         </DialogContent>
       </Dialog>
+
       <Dialog
         open={addNewService}
         onOpenChange={(open) => setAddNewService(open)}

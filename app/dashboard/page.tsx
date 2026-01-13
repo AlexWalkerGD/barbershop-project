@@ -96,7 +96,11 @@ const Dashboard = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="w-[90%]">
-                <NewBarber onSuccess={handleSuccess} />
+                <NewBarber
+                  dialogTitle="Nova barbearia"
+                  dialogDescription="Descreva sua nova barbearia"
+                  onSuccess={handleSuccess}
+                />
               </DialogContent>
             </Dialog>
           </div>

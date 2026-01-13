@@ -3,21 +3,12 @@
 import React, { useState } from "react"
 import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "@/components/ui/button"
-import { createBarbeshop } from "@/app/_actions/create-barbershop"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
+import { updatedBarbershop } from "@/app/_actions/upgrade-barbeshop"
+import { BarbershopItemProps } from "@/lib/barbershop"
 
-interface NewBarbershopProps {
-  dialogTitle: string
-  dialogDescription: string
-  onSuccess: () => void
-}
-
-const NewBarbershop = ({
-  dialogTitle,
-  dialogDescription,
-  onSuccess,
-}: NewBarbershopProps) => {
+const EditBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
   const [description, setDescription] = useState("")
@@ -53,7 +44,8 @@ const NewBarbershop = ({
         return
       }
 
-      await createBarbeshop({
+      await updatedBarbershop({
+        id: barbershop.id,
         name: name,
         description: description,
         address: address,
@@ -61,21 +53,21 @@ const NewBarbershop = ({
         imageUrl: image,
       })
 
-      toast.success("Barbearia criada com sucesso!")
+      toast.success("Alteração feita com sucesso!")
 
       handleResetInputs()
       onSuccess()
     } catch (error) {
       console.error(error)
-      toast.error("Erro ao criar barbearia")
+      toast.error("Erro ao fazer alteração")
     }
   }
 
   return (
     <div>
       <DialogHeader>
-        <DialogTitle>{dialogTitle}</DialogTitle>
-        <DialogDescription>{dialogDescription}</DialogDescription>
+        <DialogTitle>Edite sua barbearia</DialogTitle>
+        <DialogDescription>faça suas alteraçoes</DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-4 px-6 pt-4">
@@ -138,4 +130,4 @@ const NewBarbershop = ({
   )
 }
 
-export default NewBarbershop
+export default EditBarbershop
