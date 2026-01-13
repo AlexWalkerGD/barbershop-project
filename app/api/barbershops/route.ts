@@ -15,7 +15,14 @@ export async function GET() {
     // Busca barbearias do usuário logado
     const barbershops = await db.barbershop.findMany({
       where: { ownerId: session.user.id },
-      include: { services: true }, // inclui serviços se quiser
+      include: {
+        services: true,
+        employees: {
+          include: {
+            user: true,
+          },
+        },
+      },
     })
 
     return new Response(JSON.stringify(barbershops), { status: 200 })

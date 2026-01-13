@@ -3,24 +3,23 @@ import Image from "next/image"
 import { Button } from "./ui/button"
 import Link from "next/link"
 import { BarbershopItemProps } from "@/lib/barbershop"
-import {
-  Dialog,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { DialogContent } from "@/components/ui/dialog"
-import { useState } from "react"
-import AddNewEmployee from "./add-new-employee"
+import { FaGear } from "react-icons/fa6"
+import { Sheet, SheetTrigger } from "./ui/sheet"
+import SidebarConfig from "./sidebar-config"
+import { toast } from "sonner"
+import { deleteBarbershop } from "@/app/_actions/delete-barbershop"
 
 const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
-  const [addNewEmployee, setAddNewEmployee] = useState(false)
-
-  const handleSuccess = async () => {
-    setAddNewEmployee(false)
+  const handleDeleteBarbershop = async (barbershopsId: string) => {
+    try {
+      await deleteBarbershop(barbershopsId)
+      toast.success("Barbearia excluída com sucesso")
+      onSuccess()
+    } catch (error) {
+      console.error(error)
+      console.log(barbershopsId)
+      toast.error("Erro ao excluir barbearia. Tente novamente.")
+    }
   }
 
   return (
@@ -49,65 +48,26 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
               </div>
             </div>
             <div className="flex flex-col">
-              <Dialog>
-                <DialogTrigger asChild className="w-full">
-                  <Button className="mt-3 w-full" variant="destructive">
-                    X
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="w-[90%]">
-                  <DialogHeader>
-                    <DialogTitle>Você quer excluir sua barbearia?</DialogTitle>
-                    <DialogDescription>
-                      Tem certeza que deseja exluir? Essa ação é irreversível.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter className="flex flex-row gap-3">
-                    <DialogClose asChild>
-                      <Button variant="secondary" className="w-full">
-                        Não
-                      </Button>
-                    </DialogClose>
-                    <DialogClose className="w-full">
-                      <Button
-                        variant="destructive"
-                        className="w-full"
-                        onClick={() => onSuccess()}
-                      >
-                        Sim, Excluir.
-                      </Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
               <Button className="mt-3 w-full" asChild>
                 <Link href={`/schedules/${barbershop.id}`}>Ver horários</Link>
               </Button>
-              <Button
-                variant="secondary"
-                className="mt-3 w-full"
-                onClick={() => {
-                  setAddNewEmployee(true)
-                }}
-              >
-                + Colaborador
-              </Button>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="secondary" className="mt-3 w-full">
+                    <FaGear />
+                    Config
+                  </Button>
+                </SheetTrigger>
+                <SidebarConfig
+                  barbershop={barbershop}
+                  onSuccess={() => handleDeleteBarbershop(barbershop.id)}
+                />
+              </Sheet>
             </div>
           </div>
         </CardContent>
       </Card>
-      <Dialog
-        open={addNewEmployee}
-        onOpenChange={(open) => setAddNewEmployee(open)}
-      >
-        <DialogContent className="w-[90%]">
-          <AddNewEmployee
-            barbershopId={barbershop.id}
-            onSuccess={handleSuccess}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

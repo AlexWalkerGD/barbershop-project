@@ -16,9 +16,7 @@ import InfoBarber from "@/components/info-barbershop"
 import NewBarber from "@/components/new-barbershop"
 import { DialogContent } from "@/components/ui/dialog"
 import { DialogTrigger } from "@radix-ui/react-dialog"
-import { deleteBarbershop } from "../_actions/delete-barbershop"
 import { BarbershopWithRelations } from "@/lib/barbershop"
-import { toast } from "sonner"
 
 const Dashboard = () => {
   const [barbershops, setBarbershops] = useState<BarbershopWithRelations[]>([])
@@ -34,16 +32,8 @@ const Dashboard = () => {
     setBarbershops(data)
   }
 
-  const handleDeleteBarbershop = async (barbershopsId: string) => {
-    try {
-      await deleteBarbershop(barbershopsId)
-      toast.success("Barbearia excluída com sucesso")
-      setBarbershops((prev) => prev.filter((b) => b.id !== barbershopsId))
-    } catch (error) {
-      console.error(error)
-      console.log(barbershopsId)
-      toast.error("Erro ao excluir barbearia. Tente novamente.")
-    }
+  const handleSetBarbers = async (barbershopsId: string) => {
+    setBarbershops((prev) => prev.filter((b) => b.id !== barbershopsId))
   }
 
   useEffect(() => {
@@ -120,7 +110,7 @@ const Dashboard = () => {
               <InfoBarber
                 key={b.id}
                 barbershop={b}
-                onSuccess={() => handleDeleteBarbershop(b.id)}
+                onSuccess={() => handleSetBarbers(b.id)}
               />
             ))}
           </div>
