@@ -17,7 +17,6 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       onSuccess()
     } catch (error) {
       console.error(error)
-      console.log(barbershopsId)
       toast.error("Erro ao excluir barbearia. Tente novamente.")
     }
   }
@@ -56,7 +55,7 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                 <SheetTrigger asChild>
                   <Button variant="secondary" className="mt-3 w-full">
                     <FaGear />
-                    Config
+                    Configurar
                   </Button>
                 </SheetTrigger>
                 <SidebarConfig
