@@ -67,7 +67,7 @@ const EditBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
     <div>
       <DialogHeader>
         <DialogTitle>Edite sua barbearia</DialogTitle>
-        <DialogDescription>faça suas alteraçoes</DialogDescription>
+        <DialogDescription>Faça suas alteraçoes</DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-4 px-6 pt-4">

@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { BarbershopItemProps } from "@/lib/barbershop"
 import { FaTrash } from "react-icons/fa"
-import { SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
+import { SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
 import { Button } from "./ui/button"
 import { MdModeEdit } from "react-icons/md"
 import { Avatar, AvatarImage } from "./ui/avatar"
@@ -22,11 +22,13 @@ import { deleteEmployee } from "@/app/_actions/delete.employee"
 import { toast } from "sonner"
 import { deleteService } from "@/app/_actions/delete.service"
 import EditBarbershop from "./edit-barbershop"
+import { AvailabilityCard } from "./availability card"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [editBarbershop, setEditBarbershop] = useState(false)
   const [addNewEmployee, setAddNewEmployee] = useState(false)
   const [addNewService, setAddNewService] = useState(false)
+  const [editAvailability, setEditAvailability] = useState(false)
 
   const handleSuccessNewEmployee = async () => {
     setAddNewEmployee(false)
@@ -203,12 +205,13 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                 variant="secondary"
                 className="mt-3"
                 onClick={() => {
-                  setAddNewService(true)
+                  setEditAvailability(true)
                 }}
               >
-                Salvar
+                Editar
               </Button>
             </div>
+
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
           </div>
         </Card>
@@ -280,14 +283,14 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         </DialogContent>
       </Dialog>
 
-      <div className="flex flex-col gap-2 border-b border-solid py-5">
-        <SheetClose asChild></SheetClose>
-        <Button
-          className="justify-start gap-2"
-          variant="ghost"
-          asChild
-        ></Button>
-      </div>
+      <Dialog
+        open={editAvailability}
+        onOpenChange={(open) => setEditAvailability(open)}
+      >
+        <DialogContent className="w-[90%]">
+          <AvailabilityCard />
+        </DialogContent>
+      </Dialog>
     </SheetContent>
   )
 }
