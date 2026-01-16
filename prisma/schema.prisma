@@ -117,3 +117,15 @@ model BarbershopEmployee {
   createdAt    DateTime    @default(now())
   bookings     Booking[]
 }
+
+model Availability {
+  id        String @id @default(uuid())
+  employeeId String
+  day       String
+  enabled   Boolean
+  startHour String
+  endHour   String
+
+  @@unique([employeeId, day], name: "employeeId_day")
+}
+

@@ -288,7 +288,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         onOpenChange={(open) => setEditAvailability(open)}
       >
         <DialogContent className="w-[90%]">
-          <AvailabilityCard />
+          <AvailabilityCard employees={barbershop.employees} />
         </DialogContent>
       </Dialog>
     </SheetContent>

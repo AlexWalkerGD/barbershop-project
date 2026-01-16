@@ -18,7 +18,6 @@ import { isPast, isToday, set } from "date-fns"
 import { createBooking } from "@/app/_actions/create-booking"
 import { useSession } from "next-auth/react"
 import { toast } from "sonner"
-import { getBookings } from "@/app/_actions/get_bookings"
 import { Dialog } from "@radix-ui/react-dialog"
 import SignInDialog from "./sign-in-dialog"
 import { DialogContent } from "./ui/dialog"
@@ -31,80 +30,108 @@ interface ServiceItemProps {
   employee: User
 }
 
-const TIME_LIST = [
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-]
-
-interface GetTimeListProps {
-  bookings: Booking[]
-  selectedDay: Date
-}
-
-const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
-  return TIME_LIST.filter((time) => {
-    const hour = Number(time.split(":")[0])
-    const minutes = Number(time.split(":")[1])
-
-    const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }))
-    if (timeIsOnThePast && isToday(selectedDay)) {
-      return false
-    }
-
-    const hasBookingOnCurrentTime = bookings.some(
-      (booking) =>
-        booking.date.getHours() === hour &&
-        booking.date.getMinutes() === minutes,
-    )
-    if (hasBookingOnCurrentTime) {
-      return false
-    }
-    return true
-  })
-}
+const TIME_INCREMENT = 30 // minutos
 
 const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   const router = useRouter()
-  const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
   const { data } = useSession()
+
+  const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
   const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
   )
   const [dayBookings, setDayBookings] = useState<Booking[]>([])
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
+  const [availability, setAvailability] = useState<
+    { day: string; enabled: boolean; startHour: string; endHour: string }[]
+  >([])
+
+  const WEEK_DAY_INDEX: Record<string, number> = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  }
+
+  const enabledWeekDays = useMemo(
+    () =>
+      availability.filter((d) => d.enabled).map((d) => WEEK_DAY_INDEX[d.day]),
+    [availability],
+  )
+
+  const disabledDays = useMemo(
+    () => (date: Date) =>
+      isPast(date) || !enabledWeekDays.includes(date.getDay()),
+    [enabledWeekDays],
+  )
 
   useEffect(() => {
-    const fetch = async () => {
-      if (!selectedDay) return
-      const bookings = await getBookings({
-        date: selectedDay,
-        employeeId: employee.id,
-      })
-      setDayBookings(bookings)
+    if (!employee?.id) return
+    fetch(`/api/availability?employeeId=${employee.id}`)
+      .then((res) => res.json())
+      .then((data) => setAvailability(data))
+      .catch((err) => console.error(err))
+  }, [employee])
+
+  useEffect(() => {
+    if (!selectedDay || !employee?.id) return
+    const fetchBookings = async () => {
+      const res = await fetch(
+        `/api/bookings?employeeId=${employee.id}&date=${selectedDay.toISOString()}`,
+      )
+      const data = await res.json()
+      setDayBookings(data)
     }
-    fetch()
+    fetchBookings()
   }, [selectedDay, employee])
+
+  const availableTimes = useMemo(() => {
+    if (!selectedDay || !availability.length) return []
+
+    const weekDay = selectedDay
+      .toLocaleDateString("en-US", { weekday: "long" })
+      .toLowerCase()
+    const dayAvailability = availability.find(
+      (d) => d.day === weekDay && d.enabled,
+    )
+    if (!dayAvailability) return []
+
+    const slots: string[] = []
+    let [hour, minute] = dayAvailability.startHour.split(":").map(Number)
+    const [endHour, endMinute] = dayAvailability.endHour.split(":").map(Number)
+
+    while (hour < endHour || (hour === endHour && minute < endMinute)) {
+      const dateWithTime = set(selectedDay, { hours: hour, minutes: minute })
+      const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+
+      if (!(isPast(dateWithTime) && isToday(selectedDay))) {
+        if (
+          !dayBookings.some(
+            (b) => b.date.getHours() === hour && b.date.getMinutes() === minute,
+          )
+        ) {
+          slots.push(timeStr)
+        }
+      }
+
+      minute += TIME_INCREMENT
+      if (minute >= 60) {
+        minute = 0
+        hour++
+      }
+    }
+
+    return slots
+  }, [selectedDay, availability, dayBookings])
 
   const selectedDate = useMemo(() => {
     if (!selectedDay || !selectedTime) return
-    return set(selectedDay, {
-      hours: Number(selectedTime.split(":")[0]),
-      minutes: Number(selectedTime.split(":")[1]),
-    })
+    const [hours, minutes] = selectedTime.split(":").map(Number)
+    return set(selectedDay, { hours, minutes })
   }, [selectedDay, selectedTime])
 
   const handleBookingClick = () => {
@@ -113,10 +140,10 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
       return
     }
     if (data?.user) {
-      return setBookingSheetIsOpen(true)
+      setBookingSheetIsOpen(true)
+      return
     }
-
-    return setSignInDialogIsOpen(true)
+    setSignInDialogIsOpen(true)
   }
 
   const handleBookingSheetOpenChange = () => {
@@ -126,18 +153,9 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
     setBookingSheetIsOpen(false)
   }
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDay(date)
-  }
-
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time)
-  }
-
   const handleCreateBooking = async () => {
+    if (!selectedDate) return
     try {
-      if (!selectedDate) return
-
       await createBooking({
         serviceId: service.id,
         date: selectedDate,
@@ -156,11 +174,6 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
       toast.error("Erro ao criar reserva!")
     }
   }
-
-  const timeList = useMemo(() => {
-    if (!selectedDay) return []
-    return getTimeList({ bookings: dayBookings, selectedDay })
-  }, [dayBookings, selectedDay])
 
   return (
     <>
@@ -210,8 +223,8 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
                       mode="single"
                       locale={ptBR}
                       selected={selectedDay}
-                      onSelect={handleDateSelect}
-                      disabled={{ before: new Date() }}
+                      onSelect={setSelectedDay}
+                      disabled={disabledDays}
                       styles={{
                         head_cell: {
                           width: "100%",
@@ -239,15 +252,15 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
 
                   {selectedDay && (
                     <div className="flex gap-2 overflow-x-auto p-5 [&::-webkit-scrollbar]:hidden">
-                      {timeList.length > 0 ? (
-                        timeList?.map((time) => (
+                      {availableTimes.length > 0 ? (
+                        availableTimes.map((time) => (
                           <Button
                             key={time}
                             variant={
                               selectedTime === time ? "default" : "outline"
                             }
                             className="rounded-full"
-                            onClick={() => handleTimeSelect(time)}
+                            onClick={() => setSelectedTime(time)}
                           >
                             {time}
                           </Button>
