@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { format } from "date-fns"
+import React, { useEffect, useMemo, useState } from "react"
+import { format, isPast } from "date-fns"
 import Header from "@/components/header"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -10,24 +10,7 @@ import { Button } from "@/components/ui/button"
 import { DialogContent, Dialog } from "@/components/ui/dialog"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import NewBooking from "@/components/new-booking"
-
-const TIME_LIST = [
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-]
+import { generateTimeSlots } from "@/lib/generate-time-slots"
 
 interface Booking {
   id: string
@@ -54,6 +37,16 @@ interface Barbershop {
   services: Services[]
 }
 
+const WEEK_DAY_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
 export default function Schedules({ params }: { params: { id: string } }) {
   const [barbershop, setBarbershop] = useState<any>(null)
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
@@ -63,6 +56,56 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const [selected, setSelected] = useState<any | null>(null)
   const [newBooking, setNewBooking] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [availability, setAvailability] = useState<
+    { day: string; enabled: boolean; startHour: string; endHour: string }[]
+  >([])
+
+  const enabledWeekDays = useMemo(
+    () =>
+      availability.filter((d) => d.enabled).map((d) => WEEK_DAY_INDEX[d.day]),
+    [availability],
+  )
+
+  const disabledDays = useMemo(
+    () => (date: Date) =>
+      isPast(date) || !enabledWeekDays.includes(date.getDay()),
+    [enabledWeekDays],
+  )
+
+  const weekDay = selectedDate
+    .toLocaleDateString("en-US", { weekday: "long" })
+    .toLowerCase()
+
+  const dayAvailability = availability.find(
+    (d) => d.day === weekDay && d.enabled,
+  )
+
+  const slots = dayAvailability
+    ? generateTimeSlots({
+        day: selectedDate,
+        startHour: dayAvailability.startHour,
+        endHour: dayAvailability.endHour,
+      })
+    : []
+
+  useEffect(() => {
+    if (!dayAvailability) {
+      console.log("Nenhuma disponibilidade para", weekDay)
+      return
+    }
+
+    console.log("Slots do dia", weekDay)
+    slots.forEach((slot) => console.log(format(slot, "HH:mm")))
+  }, [slots, weekDay, dayAvailability])
+
+  useEffect(() => {
+    if (!selectedEmployee?.id) return
+
+    fetch(`/api/availability?employeeId=${selectedEmployee.id}`)
+      .then((res) => res.json())
+      .then((data) => setAvailability(data))
+      .catch((err) => console.error(err))
+  }, [selectedEmployee])
 
   useEffect(() => {
     if (!params.id || !selectedDate) return
@@ -81,7 +124,6 @@ export default function Schedules({ params }: { params: { id: string } }) {
 
   if (!barbershop || !selectedEmployee) return <div>Carregando...</div>
 
-  // Filtra apenas bookings do funcionário selecionado e do dia selecionado
   const bookingsToday = selectedEmployee.bookings.filter(
     (b: any) =>
       format(new Date(b.date), "yyyy-MM-dd") ===
@@ -131,6 +173,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                   {barbershop && (
                     <NewBooking
                       barbershop={barbershop}
+                      availability={availability}
                       employee={selectedEmployee}
                       services={barbershop.services[0]}
                       onSuccess={handleSuccess}
@@ -166,7 +209,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                           required
                           selected={selectedDate}
                           onSelect={handleDateSelect}
-                          disabled={{ before: new Date() }}
+                          disabled={disabledDays}
                           styles={{
                             head_cell: {
                               width: "100%",
@@ -199,11 +242,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                     className="bg-transparent text-center text-[15px] hover:bg-transparent"
                     onClick={() => setOpen(!open)}
                   >
-                    {selected?.name ? (
-                      `De: ${selected?.name}`
-                    ) : (
-                      <div>{`De: ${selectedEmployee.name}`}</div>
-                    )}
+                    {selected?.name ? `De: ${selected?.name}` : <div>De:</div>}
                   </button>
 
                   {open && (
@@ -232,26 +271,28 @@ export default function Schedules({ params }: { params: { id: string } }) {
                 }
               >
                 <div className="flex flex-col">
-                  {TIME_LIST.map((time) => {
+                  {slots.map((slot) => {
                     return (
                       <div
-                        key={time}
+                        key={slot.toISOString()}
                         className="h-[70px] pt-2 font-semibold text-gray-400"
                       >
-                        <div>{time}</div>
+                        <div>{format(slot, "HH:mm")}</div>
                       </div>
                     )
                   })}
                 </div>
                 <div className="flex w-full flex-col">
-                  {TIME_LIST.map((time) => {
+                  {slots.map((slot) => {
                     const booking = bookingsToday.find(
-                      (b: any) => format(new Date(b.date), "HH:mm") === time,
+                      (b: any) =>
+                        format(new Date(b.date), "HH:mm") ===
+                        format(slot, "HH:mm"),
                     )
 
                     return (
                       <div
-                        key={time}
+                        key={slot.toISOString()}
                         className="rounded-br-xl rounded-tr-xl ring-2 ring-secondary"
                       >
                         <div

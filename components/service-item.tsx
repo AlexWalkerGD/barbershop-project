@@ -32,6 +32,16 @@ interface ServiceItemProps {
 
 const TIME_INCREMENT = 30 // minutos
 
+const WEEK_DAY_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
 const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   const router = useRouter()
   const { data } = useSession()
@@ -46,16 +56,6 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   const [availability, setAvailability] = useState<
     { day: string; enabled: boolean; startHour: string; endHour: string }[]
   >([])
-
-  const WEEK_DAY_INDEX: Record<string, number> = {
-    sunday: 0,
-    monday: 1,
-    tuesday: 2,
-    wednesday: 3,
-    thursday: 4,
-    friday: 5,
-    saturday: 6,
-  }
 
   const enabledWeekDays = useMemo(
     () =>

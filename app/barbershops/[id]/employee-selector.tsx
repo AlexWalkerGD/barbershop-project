@@ -22,8 +22,6 @@ interface SelectableEmployee {
 const EmployeeSelector = ({ barbershop }: any) => {
   const [selectedEmployee, setSelectedEmployee] =
     useState<SelectableEmployee | null>(null)
-
-  // 🔹 Normaliza admin + funcionários
   const employees: SelectableEmployee[] = [
     ...barbershop.employees
       .filter((e: any) => e.user)

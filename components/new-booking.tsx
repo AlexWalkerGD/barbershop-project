@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useEffect, useMemo, useState } from "react"
-import {
-  Dialog,
-  DialogHeader,
-  DialogDescription,
-  DialogTitle,
-} from "./ui/dialog"
+import { DialogHeader, DialogDescription, DialogTitle } from "./ui/dialog"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
@@ -17,6 +12,8 @@ import { toast } from "sonner"
 import { isPast, isToday, set } from "date-fns"
 import { getBookings } from "@/app/_actions/get_bookings"
 
+const TIME_INCREMENT = 30
+
 interface Employee {
   id: string
   name: string
@@ -24,6 +21,12 @@ interface Employee {
 interface Services {
   id: string
   name: string
+}
+interface Availability {
+  day: string
+  enabled: boolean
+  startHour: string
+  endHour: string
 }
 
 interface BarbershopWithEmployeesServices extends Barbershop {
@@ -33,60 +36,15 @@ interface BarbershopWithEmployeesServices extends Barbershop {
 
 interface NewBookingProps {
   barbershop: BarbershopWithEmployeesServices
+  availability: Availability[]
   employee: Employee
   services: Services
   onSuccess: () => void
 }
 
-const TIME_LIST = [
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-]
-
-interface GetTimeListProps {
-  bookings: Booking[]
-  selectedDay: Date
-}
-
-const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
-  return TIME_LIST.filter((time) => {
-    const hour = Number(time.split(":")[0])
-    const minutes = Number(time.split(":")[1])
-
-    const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }))
-    if (timeIsOnThePast && isToday(selectedDay)) {
-      return false
-    }
-
-    const hasBookingOnCurrentTime = bookings.some(
-      (booking) =>
-        booking.date.getHours() === hour &&
-        booking.date.getMinutes() === minutes,
-    )
-    if (hasBookingOnCurrentTime) {
-      return false
-    }
-    return true
-  })
-}
-
 const NewBooking = ({
-  employee,
   barbershop,
-  services,
+  availability,
   onSuccess,
 }: NewBookingProps) => {
   const [name, setName] = useState("")
@@ -99,6 +57,77 @@ const NewBooking = ({
   const [bookings, setBookings] = useState<Booking[]>([])
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
+  )
+
+  const WEEK_DAY_INDEX: Record<string, number> = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+  }
+
+  const availableTimes = useMemo(() => {
+    if (!selectedDay || !availability.length) return []
+
+    const weekDay = selectedDay
+      .toLocaleDateString("en-US", { weekday: "long" })
+      .toLowerCase()
+
+    const dayAvailability = availability.find(
+      (d) => d.day === weekDay && d.enabled,
+    )
+
+    if (!dayAvailability) return []
+
+    const slots: string[] = []
+
+    let [hour, minute] = dayAvailability.startHour.split(":").map(Number)
+    const [endHour, endMinute] = dayAvailability.endHour.split(":").map(Number)
+
+    const bookedTimes = bookings.map((b) => b.date.getTime())
+
+    while (hour < endHour || (hour === endHour && minute < endMinute)) {
+      const dateWithTime = set(selectedDay, {
+        hours: hour,
+        minutes: minute,
+        seconds: 0,
+        milliseconds: 0,
+      })
+
+      const timeStr = `${String(hour).padStart(2, "0")}:${String(
+        minute,
+      ).padStart(2, "0")}`
+
+      const isBooked = bookedTimes.includes(dateWithTime.getTime())
+
+      if (!(isPast(dateWithTime) && isToday(selectedDay)) && !isBooked) {
+        slots.push(timeStr)
+      }
+
+      minute += TIME_INCREMENT
+      if (minute >= 60) {
+        minute = 0
+        hour++
+      }
+    }
+
+    return slots
+  }, [selectedDay, availability, bookings])
+
+  const enabledWeekDays = useMemo(
+    () =>
+      availability.filter((d) => d.enabled).map((d) => WEEK_DAY_INDEX[d.day]),
+    [availability],
+  )
+
+  const disabledDays = useMemo(
+    () => (date: Date) => {
+      return isPast(date) || !enabledWeekDays.includes(date.getDay())
+    },
+    [enabledWeekDays],
   )
 
   const selectedDate = useMemo(() => {
@@ -136,161 +165,154 @@ const NewBooking = ({
       if (!selectedDay) return
       const bookings = await getBookings({
         date: selectedDay,
-        employeeId: selectedEmployee.id,
+        employeeId: selectedEmployee?.id,
       })
       setBookings(bookings)
     }
     fetch()
   }, [selectedDay, selectedEmployee])
 
-  const timeList = useMemo(() => {
-    if (!selectedDay) return []
-    return getTimeList({ bookings: bookings, selectedDay })
-  }, [bookings, selectedDay])
-
   return (
-    <Dialog>
-      <div className="flex w-full max-w-full flex-col gap-2 overflow-x-auto p-2 [&::-webkit-scrollbar]:hidden">
-        <DialogHeader>
-          <DialogTitle>Novo agendamento</DialogTitle>
-        </DialogHeader>
+    <div className="flex w-full max-w-full flex-col gap-2 overflow-x-auto p-2 [&::-webkit-scrollbar]:hidden">
+      <DialogHeader>
+        <DialogTitle>Novo agendamento</DialogTitle>
+      </DialogHeader>
 
-        <div className="flex flex-col items-center gap-2 px-6 pt-4">
-          <DialogDescription>Descreva o cliente</DialogDescription>
-          <Input
-            placeholder="Nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+      <div className="flex flex-col items-center gap-2 px-6 pt-4">
+        <DialogDescription>Descreva o cliente</DialogDescription>
+        <Input
+          placeholder="Nome"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
-          <Input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <Input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <h2 className="text-sm text-[#94A3B8]">Escolha um funcionário</h2>
+        <h2 className="text-sm text-[#94A3B8]">Escolha um funcionário</h2>
 
-          <div className="relative inline-block">
-            <Button
-              className="bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
-              size="sm"
-              onClick={() => setEmployeeSelectOpen(!employeeSelectOpen)}
-            >
-              {selectedEmployee?.name ?? employee.name}
-            </Button>
+        <div className="relative inline-block">
+          <Button
+            className="bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
+            size="sm"
+            onClick={() => setEmployeeSelectOpen(!employeeSelectOpen)}
+          >
+            {selectedEmployee?.name ?? "Selecione"}
+          </Button>
 
-            {employeeSelectOpen && (
-              <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
-                {barbershop?.employees.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
-                    onClick={() => {
-                      setSelectedEmployee(opt)
-                      setEmployeeSelectOpen(false)
-                    }}
-                  >
-                    {opt.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <h2 className="text-sm text-[#94A3B8]">Selecione a data</h2>
-
-          <div className="relative inline-block rounded-xl p-2 ring-2 ring-secondary">
-            <Calendar
-              mode="single"
-              locale={ptBR}
-              required
-              selected={selectedDay}
-              onSelect={handleDateSelect}
-              disabled={{ before: new Date() }}
-              styles={{
-                head_cell: {
-                  width: "100%",
-                },
-                cell: {
-                  width: "100%",
-                },
-                button: {
-                  width: "100%",
-                },
-                nav_button_previous: {
-                  width: "32px",
-                  height: "32px",
-                },
-                nav_button_next: {
-                  width: "32px",
-                  height: "32px",
-                },
-                caption: {
-                  textTransform: "capitalize",
-                },
-              }}
-            />
-          </div>
-          {selectedEmployee && selectedDay && (
-            <div className="flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
-              {timeList.length > 0 ? (
-                timeList.map((time) => (
-                  <Button
-                    key={time}
-                    variant={selectedTime === time ? "default" : "outline"}
-                    className="shrink-0 rounded-full"
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </Button>
-                ))
-              ) : (
-                <p className="text-xs">
-                  Não há horários disponíveis para este dia.
-                </p>
-              )}
+          {employeeSelectOpen && (
+            <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
+              {barbershop?.employees.map((opt) => (
+                <div
+                  key={opt.id}
+                  className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
+                  onClick={() => {
+                    setSelectedEmployee(opt)
+                    setEmployeeSelectOpen(false)
+                  }}
+                >
+                  {opt.name}
+                </div>
+              ))}
             </div>
           )}
+        </div>
 
-          <h2 className="text-sm text-[#94A3B8]">Escolha um serviço</h2>
+        <h2 className="text-sm text-[#94A3B8]">Selecione a data</h2>
 
-          <div className="relative inline-block">
-            <Button
-              className="flex bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
-              size="sm"
-              onClick={() => setServiceSelectOpen(!serviceSelectOpen)}
-            >
-              {selectedService?.name ?? services.name}
-            </Button>
-            {serviceSelectOpen && (
-              <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
-                {barbershop?.services.map((opt) => (
-                  <div
-                    key={opt.id}
-                    className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
-                    onClick={() => {
-                      setServiceSelectOpen(false)
-                      setSelectedService(opt)
-                    }}
-                  >
-                    {opt.name}
-                  </div>
-                ))}
-              </div>
+        <div className="relative inline-block rounded-xl p-2 ring-2 ring-secondary">
+          <Calendar
+            mode="single"
+            locale={ptBR}
+            required
+            selected={selectedDay}
+            onSelect={handleDateSelect}
+            disabled={disabledDays}
+            styles={{
+              head_cell: {
+                width: "100%",
+              },
+              cell: {
+                width: "100%",
+              },
+              button: {
+                width: "100%",
+              },
+              nav_button_previous: {
+                width: "32px",
+                height: "32px",
+              },
+              nav_button_next: {
+                width: "32px",
+                height: "32px",
+              },
+              caption: {
+                textTransform: "capitalize",
+              },
+            }}
+          />
+        </div>
+        {selectedEmployee && selectedDay && (
+          <div className="flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
+            {availableTimes.length > 0 ? (
+              availableTimes.map((time) => (
+                <Button
+                  key={time}
+                  variant={selectedTime === time ? "default" : "outline"}
+                  className="rounded-full"
+                  onClick={() => setSelectedTime(time)}
+                >
+                  {time}
+                </Button>
+              ))
+            ) : (
+              <p className="text-xs">
+                Não há horários disponíveis para este dia.
+              </p>
             )}
           </div>
+        )}
+
+        <h2 className="text-sm text-[#94A3B8]">Escolha um serviço</h2>
+
+        <div className="relative inline-block">
           <Button
-            className="mt-4"
-            onClick={handleCreateBooking}
-            disabled={!selectedEmployee || !selectedDay || !selectedTime}
+            className="flex bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
+            size="sm"
+            onClick={() => setServiceSelectOpen(!serviceSelectOpen)}
           >
-            Adicionar
+            {selectedService?.name ?? "Selecione"}
           </Button>
+          {serviceSelectOpen && (
+            <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
+              {barbershop?.services.map((opt) => (
+                <div
+                  key={opt.id}
+                  className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"
+                  onClick={() => {
+                    setServiceSelectOpen(false)
+                    setSelectedService(opt)
+                  }}
+                >
+                  {opt.name}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+        <Button
+          className="mt-4"
+          onClick={handleCreateBooking}
+          disabled={!selectedEmployee || !selectedDay || !selectedTime}
+        >
+          Adicionar
+        </Button>
       </div>
-    </Dialog>
+    </div>
   )
 }
 
