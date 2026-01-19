@@ -5,13 +5,19 @@ import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
+import { UserInfo } from "@/lib/barbershop"
 
 interface AddNewEmployeeProps {
   barbershopId: string
   onSuccess: () => void
+  onAddItem: () => void
 }
 
-const AddNewEmployee = ({ onSuccess, barbershopId }: AddNewEmployeeProps) => {
+const AddNewEmployee = ({
+  onSuccess,
+  barbershopId,
+  onAddItem,
+}: AddNewEmployeeProps) => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [image, setImage] = useState("")
@@ -20,6 +26,12 @@ const AddNewEmployee = ({ onSuccess, barbershopId }: AddNewEmployeeProps) => {
   const handleAddEmployee = async () => {
     if (!name) return toast.error("Nome obrigatório")
     setLoading(true)
+
+    const newUser: UserInfo = {
+      name: name,
+      email: email,
+      image: image,
+    }
 
     try {
       const res = await fetch("/api/employees", {
@@ -33,6 +45,17 @@ const AddNewEmployee = ({ onSuccess, barbershopId }: AddNewEmployeeProps) => {
       setEmail("")
       setImage("")
       onSuccess()
+
+      onAddItem((prev) => ({
+        ...prev,
+        employees: [
+          ...prev.employees,
+          {
+            id: barbershopId,
+            user: newUser,
+          },
+        ],
+      }))
     } catch (error) {
       console.error(error)
       toast.error("Erro ao adicionar colaborador")

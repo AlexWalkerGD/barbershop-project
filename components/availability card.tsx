@@ -29,6 +29,7 @@ type DayAvailability = {
 
 type Props = {
   employees: { id: string; name: string }[]
+  onSuccess: () => void
 }
 
 const TIME_LIST = Array.from(
@@ -36,7 +37,7 @@ const TIME_LIST = Array.from(
   (_, hour) => `${String(hour).padStart(2, "0")}:00`,
 )
 
-export const AvailabilityCard = ({ employees }: Props) => {
+export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
   const WEEK_DAYS = [
     { key: "monday", label: "Segunda-feira" },
     { key: "tuesday", label: "Terça-feira" },
@@ -73,15 +74,17 @@ export const AvailabilityCard = ({ employees }: Props) => {
     if (!employees.length) return
 
     // Criar payload para cada employee
-    const payload = employees.flatMap((emp) =>
-      availability.map((day) => ({
-        id: `${emp.id}-${day.day}`, // garante que seja único
-        employeeId: emp.id,
-        day: day.day,
-        enabled: day.enabled,
-        startHour: day.startHour,
-        endHour: day.endHour,
-      })),
+    const payload = employees.flatMap(
+      (emp) =>
+        availability.map((day) => ({
+          id: `${emp.id}-${day.day}`, // garante que seja único
+          employeeId: emp.id,
+          day: day.day,
+          enabled: day.enabled,
+          startHour: day.startHour,
+          endHour: day.endHour,
+        })),
+      onSuccess(),
     )
 
     try {

@@ -2,6 +2,7 @@
 export interface UserInfo {
   name: string | null
   image: string | null
+  email: string | null
 }
 
 export interface Employee {

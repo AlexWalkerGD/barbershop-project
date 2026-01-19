@@ -6,9 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
 import { updatedBarbershop } from "@/app/_actions/upgrade-barbeshop"
-import { BarbershopItemProps } from "@/lib/barbershop"
+import { BarbershopWithRelations } from "@/lib/barbershop"
 
-const EditBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
+interface BarbershopItemProps {
+  barbershop: BarbershopWithRelations
+  onSuccess: () => void
+  onUpdate: () => void
+}
+
+const EditBarbershop = ({
+  barbershop,
+  onSuccess,
+  onUpdate,
+}: BarbershopItemProps) => {
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
   const [description, setDescription] = useState("")
@@ -46,6 +56,15 @@ const EditBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
 
       await updatedBarbershop({
         id: barbershop.id,
+        name: name,
+        description: description,
+        address: address,
+        phones: phones,
+        imageUrl: image,
+      })
+
+      onUpdate({
+        ...barbershop,
         name: name,
         description: description,
         address: address,

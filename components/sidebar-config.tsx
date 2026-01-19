@@ -25,6 +25,20 @@ import EditBarbershop from "./edit-barbershop"
 import { AvailabilityCard } from "./availability card"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
+  const [dataBarbershop, setDataBarbershop] = useState({
+    id: barbershop.id,
+    name: barbershop.name,
+    address: barbershop.address,
+    services: barbershop.services,
+    phones: barbershop.phones,
+    description: barbershop.description,
+    imageUrl: barbershop.imageUrl,
+    createdAt: Date,
+    updatedAt: Date,
+    ownerId: barbershop.ownerId,
+    owner: barbershop.owner,
+    employees: barbershop.employees,
+  })
   const [editBarbershop, setEditBarbershop] = useState(false)
   const [addNewEmployee, setAddNewEmployee] = useState(false)
   const [addNewService, setAddNewService] = useState(false)
@@ -38,6 +52,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
     setAddNewService(false)
   }
 
+  const handleSuccessEditAvailability = async () => {
+    setEditAvailability(false)
+  }
+
   const handleSuccess = async () => {
     setEditBarbershop(false)
   }
@@ -45,6 +63,11 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
     try {
       await deleteEmployee(employeeId)
       toast.success("Colaborador excluído com sucesso")
+
+      setDataBarbershop((prev) => ({
+        ...prev,
+        employees: prev.employees.filter((emp) => emp.id !== employeeId),
+      }))
     } catch (error) {
       console.error(error)
       toast.error("Erro ao excluir Colaborador. Tente novamente.")
@@ -54,10 +77,15 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const handleDeleteService = async (serviceId: string) => {
     try {
       await deleteService(serviceId)
-      toast.success("Colaborador excluído com sucesso")
+      toast.success("Serviço excluído com sucesso")
+
+      setDataBarbershop((prev) => ({
+        ...prev,
+        services: prev.services.filter((ser) => ser.id !== serviceId),
+      }))
     } catch (error) {
       console.error(error)
-      toast.error("Erro ao excluir Colaborador. Tente novamente.")
+      toast.error("Erro ao excluir Serviço. Tente novamente.")
     }
   }
 
@@ -71,10 +99,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         <div className="flex flex-row gap-3">
           <div>
             <h2 className="line-clamp-2 text-base font-medium text-white">
-              {barbershop.name}
+              {dataBarbershop.name}
             </h2>
             <p className="line-clamp-2 text-sm text-gray-400">
-              {barbershop.address}
+              {dataBarbershop.address}
             </p>
           </div>
         </div>
@@ -104,7 +132,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
               </Button>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
-            {barbershop.employees?.map((emp) => {
+            {dataBarbershop.employees?.map((emp) => {
               return (
                 <div
                   key={emp.id}
@@ -156,7 +184,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                 <p>Excluir</p>
               </div>
             </div>
-            {barbershop.services?.map((ser) => {
+            {dataBarbershop.services?.map((ser) => {
               return (
                 <div
                   key={ser.id}
@@ -255,7 +283,11 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         onOpenChange={(open) => setEditBarbershop(open)}
       >
         <DialogContent className="w-[90%]">
-          <EditBarbershop barbershop={barbershop} onSuccess={handleSuccess} />
+          <EditBarbershop
+            barbershop={dataBarbershop}
+            onSuccess={handleSuccess}
+            onUpdate={setDataBarbershop}
+          />
         </DialogContent>
       </Dialog>
 
@@ -265,8 +297,9 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       >
         <DialogContent className="w-[90%]">
           <AddNewEmployee
-            barbershopId={barbershop.id}
+            barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewEmployee}
+            onAddItem={setDataBarbershop}
           />
         </DialogContent>
       </Dialog>
@@ -277,8 +310,9 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       >
         <DialogContent className="w-[90%]">
           <AddNewService
-            barbershopId={barbershop.id}
+            barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewService}
+            onAddItem={setDataBarbershop}
           />
         </DialogContent>
       </Dialog>
@@ -288,7 +322,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         onOpenChange={(open) => setEditAvailability(open)}
       >
         <DialogContent className="w-[90%]">
-          <AvailabilityCard employees={barbershop.employees} />
+          <AvailabilityCard
+            employees={dataBarbershop.employees}
+            onSuccess={handleSuccessEditAvailability}
+          />
         </DialogContent>
       </Dialog>
     </SheetContent>

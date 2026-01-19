@@ -7,9 +7,14 @@ import { Button } from "./ui/button"
 interface AddNewServiceProps {
   barbershopId: string
   onSuccess: () => void
+  onAddItem: () => void
 }
 
-const AddNewService = ({ onSuccess, barbershopId }: AddNewServiceProps) => {
+const AddNewService = ({
+  onSuccess,
+  barbershopId,
+  onAddItem,
+}: AddNewServiceProps) => {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [imageUrl, setImageUrl] = useState("")
@@ -41,6 +46,20 @@ const AddNewService = ({ onSuccess, barbershopId }: AddNewServiceProps) => {
       setPrice("")
       setImageUrl("")
       onSuccess()
+
+      onAddItem((prev) => ({
+        ...prev,
+        services: [
+          ...prev.services,
+          {
+            name: name,
+            imageUrl: imageUrl,
+            description: description,
+            price: price,
+            barbershopId: barbershopId,
+          },
+        ],
+      }))
     } catch (error) {
       console.error(error)
       toast.error("Erro ao adicionar serviço")
