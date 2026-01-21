@@ -8,7 +8,7 @@ export interface UserInfo {
 
 export interface Employee {
   id: string
-  user?: UserInfo
+  user: UserInfo
 }
 
 export interface BarbershopBase {

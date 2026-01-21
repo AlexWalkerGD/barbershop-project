@@ -28,7 +28,15 @@ type DayAvailability = {
 }
 
 type Props = {
-  employees: { id: string; name: string }[]
+  employees: {
+    id: string
+    user: {
+      id: string
+      name?: string
+      email: string
+      image?: string
+    }
+  }[]
   onSuccess: () => void
 }
 
@@ -62,7 +70,7 @@ export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
 
   // Busca disponibilidade global (do primeiro employee, por exemplo)
   useEffect(() => {
-    if (!employees.length) return
+    if (!employees?.length) return
     fetch(`/api/availability?employeeId=${employees[0].id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -71,7 +79,7 @@ export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
   }, [employees])
 
   const handleSave = async () => {
-    if (!employees.length) return
+    if (!employees?.length) return
 
     // Criar payload para cada employee
     const payload = employees.flatMap(

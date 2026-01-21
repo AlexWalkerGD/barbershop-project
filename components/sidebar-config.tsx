@@ -33,8 +33,8 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
     phones: barbershop.phones,
     description: barbershop.description,
     imageUrl: barbershop.imageUrl,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: new Date(barbershop.createdAt),
+    updatedAt: new Date(barbershop.updatedAt),
     ownerId: barbershop.ownerId,
     owner: barbershop.owner,
     employees: barbershop.employees,
@@ -82,7 +82,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
 
       setDataBarbershop((prev) => ({
         ...prev,
-        services: prev.services.filter((ser) => ser.id !== serviceId),
+        services: prev.services?.filter((ser) => ser.id !== serviceId),
       }))
     } catch (error) {
       console.error(error)
@@ -153,7 +153,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   <div>
                     <Button
                       variant="secondary"
-                      onClick={() => handleDeleteEmployee(emp.user?.id, emp.id)}
+                      onClick={() => {
+                        if (!emp.user?.id) return
+                        handleDeleteEmployee(emp.user.id, emp.id)
+                      }}
                     >
                       <FaTrash />
                     </Button>
@@ -287,7 +290,12 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <EditBarbershop
             barbershop={dataBarbershop}
             onSuccess={handleSuccess}
-            onUpdate={setDataBarbershop}
+            onUpdate={(updatedData) =>
+              setDataBarbershop((prev) => ({
+                ...prev,
+                ...updatedData,
+              }))
+            }
           />
         </DialogContent>
       </Dialog>
@@ -300,7 +308,12 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <AddNewEmployee
             barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewEmployee}
-            onAddItem={setDataBarbershop}
+            onAddItem={(updatedData) =>
+              setDataBarbershop((prev) => ({
+                ...prev,
+                ...updatedData,
+              }))
+            }
           />
         </DialogContent>
       </Dialog>
@@ -313,7 +326,12 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <AddNewService
             barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewService}
-            onAddItem={setDataBarbershop}
+            onAddItem={(updatedData) =>
+              setDataBarbershop((prev) => ({
+                ...prev,
+                ...updatedData,
+              }))
+            }
           />
         </DialogContent>
       </Dialog>
@@ -324,7 +342,17 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       >
         <DialogContent className="w-[90%]">
           <AvailabilityCard
-            employees={dataBarbershop.employees}
+            employees={
+              (dataBarbershop.employees as {
+                id: string
+                user: {
+                  id: string
+                  name?: string
+                  email: string
+                  image?: string
+                }
+              }[]) || []
+            }
             onSuccess={handleSuccessEditAvailability}
           />
         </DialogContent>

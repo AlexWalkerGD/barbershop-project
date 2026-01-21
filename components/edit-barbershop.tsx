@@ -6,12 +6,31 @@ import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
 import { updatedBarbershop } from "@/app/_actions/upgrade-barbeshop"
-import { BarbershopWithRelations } from "@/lib/barbershop"
+import { BarbershopWithRelations, Employee, UserInfo } from "@/lib/barbershop"
+
+interface BarbershopState {
+  id: string
+  name: string
+  address: string
+  services?: {
+    id: string
+    name: string
+    price: number
+  }[]
+  phones: string[]
+  description: string
+  imageUrl: string
+  createdAt: Date
+  updatedAt: Date
+  ownerId: string | null
+  owner?: UserInfo
+  employees?: Employee[]
+}
 
 interface BarbershopItemProps {
   barbershop: BarbershopWithRelations
   onSuccess: () => void
-  onUpdate: () => void
+  onUpdate: (data: Partial<BarbershopState>) => void
 }
 
 const EditBarbershop = ({
@@ -68,7 +87,6 @@ const EditBarbershop = ({
       })
 
       onUpdate({
-        ...barbershop,
         name: name,
         description: description,
         address: address,

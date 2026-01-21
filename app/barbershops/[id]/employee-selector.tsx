@@ -16,7 +16,7 @@ interface SelectableEmployee {
   id: string
   name: string | null
   image: string | null
-  role: "OWNER" | "EMPLOYEE"
+  role: "EMPLOYEE"
 }
 
 const EmployeeSelector = ({ barbershop }: any) => {
@@ -126,7 +126,7 @@ const EmployeeSelector = ({ barbershop }: any) => {
 
         {/* CONTATO */}
         <div className="space-y-3 p-5">
-          {barbershop.phones.map((phone) => (
+          {barbershop.phones.map((phone: any) => (
             <PhoneItem key={phone} phone={phone} />
           ))}
         </div>

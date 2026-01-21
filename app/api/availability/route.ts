@@ -4,8 +4,7 @@ import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
   try {
-    const availability = await req.json() // array de dias para todos os employees
-    console.log("Recebido no backend:", availability)
+    const availability = await req.json()
 
     await Promise.all(
       availability.map((day: any) =>
@@ -45,7 +44,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const employeeId = searchParams.get("employeeId")
+  const employeeId = searchParams.get("employeeId") ?? undefined
   const availability = await db.availability.findMany({ where: { employeeId } })
   return NextResponse.json(availability, { status: 200 })
 }

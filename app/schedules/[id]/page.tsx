@@ -246,7 +246,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
 
                   {open && (
                     <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
-                      {barbershop.employees.map((opt) => (
+                      {barbershop.employees.map((opt: any) => (
                         <div
                           key={opt.id}
                           className="cursor-pointer bg-background px-4 py-2 text-sm transition hover:bg-primary"

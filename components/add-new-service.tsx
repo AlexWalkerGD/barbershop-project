@@ -3,11 +3,37 @@ import { toast } from "sonner"
 import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
+import { Employee, UserInfo } from "@/lib/barbershop"
+
+interface BarbershopState {
+  id: string
+  name: string
+  address: string
+  services?: {
+    id: string
+    name: string
+    description: string
+    image: string
+    price: number
+  }[]
+  phones: string[]
+  description: string
+  imageUrl: string
+  createdAt: Date
+  updatedAt: Date
+  ownerId: string | null
+  owner?: UserInfo
+  employees?: Employee[]
+}
 
 interface AddNewServiceProps {
   barbershopId: string
   onSuccess: () => void
-  onAddItem: () => void
+  onAddItem: (
+    data:
+      | Partial<BarbershopState>
+      | ((prev: BarbershopState) => BarbershopState),
+  ) => void
 }
 
 const AddNewService = ({
@@ -51,13 +77,13 @@ const AddNewService = ({
       onAddItem((prev) => ({
         ...prev,
         services: [
-          ...prev.services,
+          ...(prev.services || []),
           {
-            name: name,
-            imageUrl: imageUrl,
-            description: description,
-            price: price,
-            barbershopId: barbershopId,
+            id: crypto.randomUUID(),
+            name,
+            description,
+            image: imageUrl,
+            price: Number(price),
           },
         ],
       }))

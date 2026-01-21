@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 
   const employees = await db.user.findMany({
     where: {
-      barbershops: {
+      barbershopsOwned: {
         some: { id: barbershopId },
       },
     },

@@ -5,12 +5,37 @@ import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
-import { UserInfo } from "@/lib/barbershop"
+import { Employee, UserInfo } from "@/lib/barbershop"
+
+interface BarbershopState {
+  id: string
+  name: string
+  address: string
+  services?: {
+    id: string
+    name: string
+    description: string
+    image: string
+    price: number
+  }[]
+  phones: string[]
+  description: string
+  imageUrl: string
+  createdAt: Date
+  updatedAt: Date
+  ownerId: string | null
+  owner?: UserInfo
+  employees?: Employee[]
+}
 
 interface AddNewEmployeeProps {
   barbershopId: string
   onSuccess: () => void
-  onAddItem: () => void
+  onAddItem: (
+    data:
+      | Partial<BarbershopState>
+      | ((prev: BarbershopState) => BarbershopState),
+  ) => void
 }
 
 const AddNewEmployee = ({
@@ -30,9 +55,15 @@ const AddNewEmployee = ({
     setLoading(true)
 
     const newUser: UserInfo = {
+      id: crypto.randomUUID(),
       name: name,
       email: email,
       image: image,
+    }
+
+    const newEmployee = {
+      id: crypto.randomUUID(),
+      user: newUser,
     }
 
     try {
@@ -50,13 +81,7 @@ const AddNewEmployee = ({
 
       onAddItem((prev) => ({
         ...prev,
-        employees: [
-          ...prev.employees,
-          {
-            id: barbershopId,
-            user: newUser,
-          },
-        ],
+        employees: [...(prev.employees || []), newEmployee],
       }))
     } catch (error) {
       console.error(error)
