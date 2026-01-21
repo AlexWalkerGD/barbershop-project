@@ -23,7 +23,6 @@ export async function createEmployee(data: CreateEmployeeInput) {
       name: data.name,
       email: data.email,
       role: "BARBER",
-      barbershopId: data.barbershopId,
       image: data.image,
     },
   })
