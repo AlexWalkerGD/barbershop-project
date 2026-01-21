@@ -1,5 +1,6 @@
 // types/barbershop.ts
 export interface UserInfo {
+  id: string
   name: string | null
   image: string | null
   email: string | null

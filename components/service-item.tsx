@@ -23,6 +23,7 @@ import SignInDialog from "./sign-in-dialog"
 import { DialogContent } from "./ui/dialog"
 import BookingSummary from "./booking-summary"
 import { useRouter } from "next/navigation"
+import { getBookings } from "@/app/_actions/get_bookings"
 
 interface ServiceItemProps {
   service: BarbershopService
@@ -78,15 +79,15 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   }, [employee])
 
   useEffect(() => {
-    if (!selectedDay || !employee?.id) return
-    const fetchBookings = async () => {
-      const res = await fetch(
-        `/api/bookings?employeeId=${employee.id}&date=${selectedDay.toISOString()}`,
-      )
-      const data = await res.json()
-      setDayBookings(data)
+    const fetch = async () => {
+      if (!selectedDay) return
+      const bookings = await getBookings({
+        date: selectedDay,
+        employeeId: employee.id,
+      })
+      setDayBookings(bookings)
     }
-    fetchBookings()
+    fetch()
   }, [selectedDay, employee])
 
   const availableTimes = useMemo(() => {
@@ -101,21 +102,28 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
     if (!dayAvailability) return []
 
     const slots: string[] = []
+
     let [hour, minute] = dayAvailability.startHour.split(":").map(Number)
     const [endHour, endMinute] = dayAvailability.endHour.split(":").map(Number)
 
-    while (hour < endHour || (hour === endHour && minute < endMinute)) {
-      const dateWithTime = set(selectedDay, { hours: hour, minutes: minute })
-      const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+    const bookedTimes = dayBookings.map((b) => b.date.getTime())
 
-      if (!(isPast(dateWithTime) && isToday(selectedDay))) {
-        if (
-          !dayBookings.some(
-            (b) => b.date.getHours() === hour && b.date.getMinutes() === minute,
-          )
-        ) {
-          slots.push(timeStr)
-        }
+    while (hour < endHour || (hour === endHour && minute < endMinute)) {
+      const dateWithTime = set(selectedDay, {
+        hours: hour,
+        minutes: minute,
+        seconds: 0,
+        milliseconds: 0,
+      })
+
+      const timeStr = `${String(hour).padStart(2, "0")}:${String(
+        minute,
+      ).padStart(2, "0")}`
+
+      const isBooked = bookedTimes.includes(dateWithTime.getTime())
+
+      if (!(isPast(dateWithTime) && isToday(selectedDay)) && !isBooked) {
+        slots.push(timeStr)
       }
 
       minute += TIME_INCREMENT
@@ -124,7 +132,7 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
         hour++
       }
     }
-
+    console.log(slots)
     return slots
   }, [selectedDay, availability, dayBookings])
 

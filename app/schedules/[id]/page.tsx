@@ -128,7 +128,6 @@ export default function Schedules({ params }: { params: { id: string } }) {
     (b: any) =>
       format(new Date(b.date), "yyyy-MM-dd") ===
       format(selectedDate, "yyyy-MM-dd"),
-    console.log(selectedEmployee.bookings),
   )
 
   const handleBookingClick = () => {

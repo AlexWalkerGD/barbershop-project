@@ -59,14 +59,15 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const handleSuccess = async () => {
     setEditBarbershop(false)
   }
-  const handleDeleteEmployee = async (employeeId: string) => {
+
+  const handleDeleteEmployee = async (userId: string, employeeId: string) => {
     try {
-      await deleteEmployee(employeeId)
+      await deleteEmployee(userId, employeeId)
       toast.success("Colaborador excluído com sucesso")
 
       setDataBarbershop((prev) => ({
         ...prev,
-        employees: prev.employees.filter((emp) => emp.id !== employeeId),
+        employees: prev.employees?.filter((emp) => emp.id !== employeeId),
       }))
     } catch (error) {
       console.error(error)
@@ -152,7 +153,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   <div>
                     <Button
                       variant="secondary"
-                      onClick={() => handleDeleteEmployee(emp.id)}
+                      onClick={() => handleDeleteEmployee(emp.user?.id, emp.id)}
                     >
                       <FaTrash />
                     </Button>

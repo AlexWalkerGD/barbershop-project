@@ -75,11 +75,9 @@ const NewBooking = ({
     const weekDay = selectedDay
       .toLocaleDateString("en-US", { weekday: "long" })
       .toLowerCase()
-
     const dayAvailability = availability.find(
       (d) => d.day === weekDay && d.enabled,
     )
-
     if (!dayAvailability) return []
 
     const slots: string[] = []
@@ -113,7 +111,7 @@ const NewBooking = ({
         hour++
       }
     }
-
+    console.log(slots)
     return slots
   }, [selectedDay, availability, bookings])
 
@@ -145,6 +143,10 @@ const NewBooking = ({
   const handleCreateBooking = async () => {
     try {
       if (!selectedDate) return
+      if (!name) return toast.error("Nome obrigatório")
+      if (!email) return toast.error("Email obrigatório")
+      if (!selectedEmployee) return toast.error("Selecione um funcionário")
+      if (!selectedService) return toast.error("Selecione um serviço")
 
       await createBooking({
         serviceId: selectedService.id,

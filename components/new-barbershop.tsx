@@ -48,10 +48,14 @@ const NewBarbershop = ({
 
   const handleCreateBarbershop = async () => {
     try {
-      if (!name || !address || !phones) {
-        toast.error("Preencha os campos obrigatórios")
-        return
-      }
+      if (!name) return toast.error("Nome obrigatório")
+      if (!description) return toast.error("Descrição obrigatório")
+      if (!address) return toast.error("Endereço obrigatório")
+
+      const phoneRegex = /^\d{9}$/
+      const hasValidPhone = phones.some((phone) => phoneRegex.test(phone))
+      if (!hasValidPhone) return toast.error("Telefone obrigatório")
+      if (!image) return toast.error("Imagem obrigatório")
 
       await createBarbeshop({
         name: name,

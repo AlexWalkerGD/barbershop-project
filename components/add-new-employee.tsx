@@ -25,6 +25,8 @@ const AddNewEmployee = ({
 
   const handleAddEmployee = async () => {
     if (!name) return toast.error("Nome obrigatório")
+    if (!email) return toast.error("Email obrigatório")
+    if (!image) return toast.error("Imagem obrigatório")
     setLoading(true)
 
     const newUser: UserInfo = {

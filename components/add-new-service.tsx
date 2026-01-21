@@ -24,6 +24,7 @@ const AddNewService = ({
   const handleAddService = async () => {
     if (!name) return toast.error("Nome obrigatório")
     if (!description) return toast.error("Descrição obrigatório")
+    if (!imageUrl) return toast.error("Imagem obrigatório")
     if (!price) return toast.error("Preço obrigatório")
     setLoading(true)
 
