@@ -10,7 +10,6 @@ export async function POST(req: Request) {
       availability.map((day: any) =>
         db.availability.upsert({
           where: {
-            // UNIQUE(employeeId + day) precisa existir no schema
             employeeId_day: { employeeId: day.employeeId, day: day.day },
           },
           update: {
@@ -34,7 +33,7 @@ export async function POST(req: Request) {
       { status: 200 },
     )
   } catch (error) {
-    console.error(error)
+    console.error("Erro no POST /api/availability:", error)
     return NextResponse.json(
       { error: "Erro ao salvar disponibilidade" },
       { status: 500 },
@@ -43,8 +42,28 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const employeeId = searchParams.get("employeeId") ?? undefined
-  const availability = await db.availability.findMany({ where: { employeeId } })
-  return NextResponse.json(availability, { status: 200 })
+  try {
+    const { searchParams } = new URL(req.url)
+    const employeeId = searchParams.get("employeeId")
+
+    if (!employeeId) {
+      console.error("GET /api/availability chamado sem employeeId")
+      return NextResponse.json(
+        { error: "employeeId é obrigatório" },
+        { status: 400 },
+      )
+    }
+
+    const availability = await db.availability.findMany({
+      where: { employeeId },
+    })
+
+    return NextResponse.json(availability, { status: 200 })
+  } catch (error) {
+    console.error("Erro no GET /api/availability:", error)
+    return NextResponse.json(
+      { error: "Erro ao buscar disponibilidade" },
+      { status: 500 },
+    )
+  }
 }

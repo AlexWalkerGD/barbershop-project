@@ -6,6 +6,11 @@ export async function POST(req: NextRequest) {
     const { name, image, email, barbershopId } = await req.json()
 
     if (!name || !email || !barbershopId) {
+      console.error("POST /api/employees: dados insuficientes", {
+        name,
+        email,
+        barbershopId,
+      })
       return NextResponse.json(
         { error: "Dados insuficientes" },
         { status: 400 },
@@ -21,6 +26,7 @@ export async function POST(req: NextRequest) {
         role: "BARBER",
       },
     })
+
     await db.barbershopEmployee.create({
       data: {
         barbershopId,
@@ -30,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(user, { status: 201 })
   } catch (error) {
-    console.error(error)
+    console.error("Erro no POST /api/employees:", error)
     return NextResponse.json(
       { error: "Erro ao criar colaborador" },
       { status: 500 },
@@ -38,30 +44,39 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url)
-  const barbershopId = url.searchParams.get("barbershopId")
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url)
+    const barbershopId = url.searchParams.get("barbershopId")
 
-  if (!barbershopId) {
+    if (!barbershopId) {
+      console.error("GET /api/employees chamado sem barbershopId")
+      return NextResponse.json(
+        { error: "barbershopId is required" },
+        { status: 400 },
+      )
+    }
+
+    const employees = await db.user.findMany({
+      where: {
+        barbershopsOwned: {
+          some: { id: barbershopId },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        role: true,
+      },
+    })
+
+    return NextResponse.json(employees, { status: 200 })
+  } catch (error) {
+    console.error("Erro no GET /api/employees:", error)
     return NextResponse.json(
-      { error: "barbershopId is required" },
-      { status: 400 },
+      { error: "Erro ao buscar colaboradores" },
+      { status: 500 },
     )
   }
-
-  const employees = await db.user.findMany({
-    where: {
-      barbershopsOwned: {
-        some: { id: barbershopId },
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      role: true,
-    },
-  })
-
-  return NextResponse.json(employees)
 }

@@ -7,6 +7,12 @@ export async function POST(req: NextRequest) {
       await req.json()
 
     if (!name || !description || !price || !barbershopId) {
+      console.error("POST /api/services: dados insuficientes", {
+        name,
+        description,
+        price,
+        barbershopId,
+      })
       return NextResponse.json(
         { error: "Dados insuficientes" },
         { status: 400 },
@@ -25,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(service, { status: 201 })
   } catch (error) {
-    console.error(error)
+    console.error("Erro no POST /api/services:", error)
     return NextResponse.json(
       { error: "Erro ao criar serviço" },
       { status: 500 },

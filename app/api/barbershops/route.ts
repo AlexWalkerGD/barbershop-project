@@ -9,6 +9,7 @@ export async function GET() {
     // Pega a sessão do usuário logado
     const session = await getServerSession(authOptions)
     if (!session) {
+      console.error("GET /api/barbershops chamado sem usuário logado")
       return new Response(JSON.stringify({ error: "Não autenticado" }), {
         status: 401,
       })
@@ -29,7 +30,7 @@ export async function GET() {
 
     return new Response(JSON.stringify(barbershops), { status: 200 })
   } catch (err) {
-    console.error(err)
+    console.error("Erro no GET /api/barbershops:", err)
     return new Response(
       JSON.stringify({ error: "Erro ao buscar barbearias" }),
       { status: 500 },

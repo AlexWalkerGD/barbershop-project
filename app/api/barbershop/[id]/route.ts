@@ -6,49 +6,57 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
-  const { id } = params
+  try {
+    const { id } = params
 
-  if (!id)
-    return NextResponse.json(
-      { error: "Barbershop id required" },
-      { status: 400 },
-    )
-  const selectedDateStr = req.nextUrl.searchParams.get("date")
-  const selectedDate = selectedDateStr ? new Date(selectedDateStr) : new Date()
+    if (!id) {
+      console.error("GET /api/barbershop chamado sem id")
+      return NextResponse.json(
+        { error: "Barbershop id required" },
+        { status: 400 },
+      )
+    }
 
-  const barbershop = await db.barbershop.findUnique({
-    where: { id },
-    include: {
-      owner: true,
-      employees: {
-        include: {
-          user: true,
-          bookings: {
-            where: {
-              date: {
-                gte: startOfDay(selectedDate),
-                lte: endOfDay(selectedDate),
+    const selectedDateStr = req.nextUrl.searchParams.get("date")
+    const selectedDate = selectedDateStr
+      ? new Date(selectedDateStr)
+      : new Date()
+
+    const barbershop = await db.barbershop.findUnique({
+      where: { id },
+      include: {
+        owner: true,
+        employees: {
+          include: {
+            user: true,
+            bookings: {
+              where: {
+                date: {
+                  gte: startOfDay(selectedDate),
+                  lte: endOfDay(selectedDate),
+                },
               },
-            },
-            include: {
-              user: true,
-              service: true,
+              include: {
+                user: true,
+                service: true,
+              },
             },
           },
         },
+        services: true,
       },
-      services: true,
-    },
-  })
+    })
 
-  if (!barbershop)
-    return NextResponse.json({ error: "Barbershop not found" }, { status: 404 })
+    if (!barbershop) {
+      console.error(`Barbershop não encontrada: ${id}`)
+      return NextResponse.json(
+        { error: "Barbershop not found" },
+        { status: 404 },
+      )
+    }
 
-  const employees = []
-
-  // Employees
-  for (const emp of barbershop.employees) {
-    employees.push({
+    // Employees
+    const employees = barbershop.employees.map((emp) => ({
       id: emp.id,
       name: emp.user?.name ?? "Sem nome",
       bookings: emp.bookings.map((b) => ({
@@ -57,19 +65,25 @@ export async function GET(
         userName: b.user?.name ?? "Cliente",
         serviceName: b.service?.name ?? "Serviço",
       })),
+    }))
+
+    // Services
+    const services = barbershop.services.map((s) => ({
+      id: s.id,
+      name: s.name,
+    }))
+
+    return NextResponse.json({
+      id: barbershop.id,
+      name: barbershop.name,
+      employees,
+      services,
     })
+  } catch (error) {
+    console.error("Erro no GET /api/barbershop:", error)
+    return NextResponse.json(
+      { error: "Erro ao buscar barbearia" },
+      { status: 500 },
+    )
   }
-
-  // Services
-  const services = barbershop.services.map((s) => ({
-    id: s.id,
-    name: s.name,
-  }))
-
-  return NextResponse.json({
-    id: barbershop.id,
-    name: barbershop.name,
-    employees,
-    services,
-  })
 }

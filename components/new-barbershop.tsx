@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Button } from "@/components/ui/button"
-import { createBarbeshop } from "@/app/_actions/create-barbershop"
+import { createBarbershop } from "@/app/_actions/create-barbershop"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
 
@@ -57,7 +57,7 @@ const NewBarbershop = ({
       if (!hasValidPhone) return toast.error("Telefone obrigatório")
       if (!image) return toast.error("Imagem obrigatório")
 
-      await createBarbeshop({
+      await createBarbershop({
         name: name,
         description: description,
         address: address,

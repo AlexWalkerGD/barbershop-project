@@ -12,22 +12,34 @@ interface CreateBookingParams {
   imageUrl: string
 }
 
-export const createBarbeshop = async (params: CreateBookingParams) => {
-  const session = await getServerSession(authOptions)
-  if (!session) {
-    throw new Error("Usuário não autenticado")
-  }
-  const ownerId = session.user.id
-  const newBarbershop = await db.barbershop.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { ...params, ownerId },
-  })
+export const createBarbershop = async (params: CreateBookingParams) => {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      console.error("Usuário não autenticado ao criar barbearia")
+      throw new Error("Usuário não autenticado")
+    }
 
-  await db.barbershopEmployee.create({
-    data: {
-      barbershopId: newBarbershop.id,
-      userId: ownerId,
-    },
-  })
-  return newBarbershop
+    const ownerId = session.user.id
+
+    const newBarbershop = await db.barbershop.create({
+      data: { ...params, ownerId },
+    })
+
+    try {
+      await db.barbershopEmployee.create({
+        data: {
+          barbershopId: newBarbershop.id,
+          userId: ownerId,
+        },
+      })
+    } catch (error) {
+      console.error("Erro ao criar employee da barbearia:", error)
+    }
+
+    return newBarbershop
+  } catch (err) {
+    console.error("Erro ao criar barbearia:", err)
+    throw new Error("Erro ao criar barbearia")
+  }
 }
