@@ -6,7 +6,12 @@ import { db } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 
 export const getConcludedBookings = async () => {
-  const session = await getServerSession(authOptions)
+  let session
+  try {
+    session = await getServerSession(authOptions)
+  } catch (error) {
+    console.error("Erro ao obter sessão:", error)
+  }
   if (!session?.user) return []
 
   return db.booking.findMany({

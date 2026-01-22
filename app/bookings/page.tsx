@@ -8,9 +8,14 @@ import { getConfirmedBookings } from "../_data/get-confirmed-bookings"
 import { getConcludedBookings } from "../_data/get-concluded-bookings"
 
 const Bookings = async () => {
-  const session = await getServerSession(authOptions)
+  let session
+  try {
+    session = await getServerSession(authOptions)
+  } catch (error) {
+    console.error("Erro ao obter sessão:", error)
+  }
+
   if (!session?.user) {
-    //mostrar pop de login
     return notFound()
   }
   const confirmedBookings = await getConfirmedBookings()

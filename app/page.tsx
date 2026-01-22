@@ -13,9 +13,20 @@ import { authOptions } from "@/lib/auth"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { getConfirmedBookings } from "./_data/get-confirmed-bookings"
+import { NextResponse } from "next/server"
 
 const Home = async () => {
-  const session = await getServerSession(authOptions)
+  let session
+  try {
+    session = await getServerSession(authOptions)
+  } catch (error) {
+    console.error("Erro ao obter sessão:", error)
+  }
+
+  if (!session) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
+  }
+
   const barbershops = await db.barbershop.findMany({})
   const confirmedBookings = await getConfirmedBookings()
 
