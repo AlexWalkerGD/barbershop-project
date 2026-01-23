@@ -61,7 +61,7 @@ export async function GET(
       name: emp.user?.name ?? "Sem nome",
       bookings: emp.bookings.map((b) => ({
         id: b.id,
-        date: b.date,
+        date: b.date.toISOString(),
         userName: b.user?.name ?? "Cliente",
         serviceName: b.service?.name ?? "Serviço",
       })),

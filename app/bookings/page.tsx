@@ -7,6 +7,8 @@ import { notFound } from "next/navigation"
 import { getConfirmedBookings } from "../_data/get-confirmed-bookings"
 import { getConcludedBookings } from "../_data/get-concluded-bookings"
 
+export const dynamic = "force-dynamic"
+
 const Bookings = async () => {
   let session
   try {

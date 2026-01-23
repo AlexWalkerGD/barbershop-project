@@ -15,6 +15,8 @@ import { ptBR } from "date-fns/locale"
 import { getConfirmedBookings } from "./_data/get-confirmed-bookings"
 import { NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 const Home = async () => {
   let session
   try {

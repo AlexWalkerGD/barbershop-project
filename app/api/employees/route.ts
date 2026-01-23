@@ -1,81 +1,38 @@
-import { NextRequest, NextResponse } from "next/server"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@/lib/prisma"
+import { NextResponse } from "next/server"
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { name, image, email, barbershopId } = await req.json()
+    const body = await req.json()
+    console.log("📦 BODY:", body)
 
-    if (!name || !email || !barbershopId) {
-      console.error("POST /api/employees: dados insuficientes", {
-        name,
-        email,
-        barbershopId,
-      })
-      return NextResponse.json(
-        { error: "Dados insuficientes" },
-        { status: 400 },
-      )
-    }
-
-    // Criar usuário com role BARBER e vincular à barbearia
     const user = await db.user.create({
       data: {
-        name,
-        image,
-        email,
+        name: body.name,
+        email: body.email,
+        image: body.image ?? null,
         role: "BARBER",
       },
     })
 
     await db.barbershopEmployee.create({
       data: {
-        barbershopId,
+        barbershopId: body.barbershopId,
         userId: user.id,
       },
     })
 
     return NextResponse.json(user, { status: 201 })
-  } catch (error) {
-    console.error("Erro no POST /api/employees:", error)
+  } catch (error: any) {
+    console.error("🔥 ERROR POST EMPLOYEE:", error)
+
     return NextResponse.json(
-      { error: "Erro ao criar colaborador" },
-      { status: 500 },
-    )
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const url = new URL(req.url)
-    const barbershopId = url.searchParams.get("barbershopId")
-
-    if (!barbershopId) {
-      console.error("GET /api/employees chamado sem barbershopId")
-      return NextResponse.json(
-        { error: "barbershopId is required" },
-        { status: 400 },
-      )
-    }
-
-    const employees = await db.user.findMany({
-      where: {
-        barbershopsOwned: {
-          some: { id: barbershopId },
-        },
+      {
+        message: "Erro ao criar employee",
+        prismaError: error?.message,
+        meta: error?.meta ?? null,
       },
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        role: true,
-      },
-    })
-
-    return NextResponse.json(employees, { status: 200 })
-  } catch (error) {
-    console.error("Erro no GET /api/employees:", error)
-    return NextResponse.json(
-      { error: "Erro ao buscar colaboradores" },
       { status: 500 },
     )
   }
