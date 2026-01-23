@@ -22,7 +22,7 @@ const Dashboard = () => {
   const [barbershops, setBarbershops] = useState<BarbershopWithRelations[]>([])
   const [newBarbershop, setNewBarbershop] = useState(false)
   const handleLoginWithGoogleClick = () => signIn("google")
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   const handleSuccess = async () => {
     setNewBarbershop(false)
@@ -43,6 +43,10 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then((data) => setBarbershops(data))
   }, [session])
+
+  if (status === "unauthenticated") {
+    return <div>Carregando...</div>
+  }
 
   if (!session) {
     return (
