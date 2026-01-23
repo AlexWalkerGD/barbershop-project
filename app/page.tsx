@@ -13,22 +13,11 @@ import { authOptions } from "@/lib/auth"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { getConfirmedBookings } from "./_data/get-confirmed-bookings"
-import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 
 const Home = async () => {
-  let session
-  try {
-    session = await getServerSession(authOptions)
-  } catch (error) {
-    console.error("Erro ao obter sessão:", error)
-  }
-
-  if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
-  }
-
+  const session = await getServerSession(authOptions)
   const barbershops = await db.barbershop.findMany({})
   const confirmedBookings = await getConfirmedBookings()
 
