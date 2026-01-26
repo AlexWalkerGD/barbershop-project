@@ -1,7 +1,12 @@
 "use client"
 
 import React, { useState } from "react"
-import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import {
+  Dialog,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
@@ -93,40 +98,42 @@ const AddNewEmployee = ({
 
   return (
     <div>
-      <DialogHeader>
-        <DialogTitle>Novo Colaborador</DialogTitle>
-        <DialogDescription>
-          Adicione um novo funcionário à barbearia
-        </DialogDescription>
-      </DialogHeader>
-      <div className="flex flex-col gap-4 px-6 pt-4">
-        <Input
-          type="text"
-          placeholder="Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          type="url"
-          placeholder="Imagem"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-        />
-        <Button
-          className="mx-28"
-          onClick={handleAddEmployee}
-          disabled={loading}
-        >
-          {loading ? "Criando..." : "Adicionar"}
-        </Button>
-      </div>
+      <Dialog>
+        <DialogHeader>
+          <DialogTitle>Novo Colaborador</DialogTitle>
+          <DialogDescription>
+            Adicione um novo funcionário à barbearia
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 px-6 pt-4">
+          <Input
+            type="text"
+            placeholder="Nome"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            type="url"
+            placeholder="Imagem"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+          />
+          <Button
+            className="mx-28"
+            onClick={handleAddEmployee}
+            disabled={loading}
+          >
+            {loading ? "Criando..." : "Adicionar"}
+          </Button>
+        </div>
+      </Dialog>
     </div>
   )
 }

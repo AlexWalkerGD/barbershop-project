@@ -81,7 +81,7 @@ const Dashboard = () => {
     <div>
       <div>
         <Header />
-        <div className="p-5">
+        <div className="m-5">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
               <h1 className="text-xl font-bold">Dashboard</h1>
@@ -93,7 +93,7 @@ const Dashboard = () => {
             >
               <DialogTrigger asChild>
                 <Button
-                  className="mt-3 p-[10px] pb-4 text-4xl font-extralight"
+                  className="mt-3 p-[10px] pb-5 text-4xl font-extralight"
                   onClick={() => setNewBarbershop(true)}
                 >
                   +
@@ -112,7 +112,7 @@ const Dashboard = () => {
             Minhas barbearias
           </h2>
 
-          <div className="flex flex-col items-center justify-center gap-5 pt-5">
+          <div className="flex flex-col gap-5 pt-5">
             {barbershops.length === 0 && <p>Você não tem barbearias.</p>}
             {barbershops.map((b) => (
               <InfoBarber

@@ -91,7 +91,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   }
 
   return (
-    <SheetContent>
+    <SheetContent className="max-h-[100dvh] overflow-y-auto">
       <SheetHeader>
         <SheetTitle className="text-left">Configurações</SheetTitle>
       </SheetHeader>
@@ -129,7 +129,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   setAddNewEmployee(true)
                 }}
               >
-                + Colaborador
+                + Novo
               </Button>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
@@ -177,7 +177,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   setAddNewService(true)
                 }}
               >
-                + Serviços
+                + Novo
               </Button>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
@@ -222,7 +222,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   setAddNewService(true)
                 }}
               >
-                + Produtos
+                + Novo
               </Button>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>

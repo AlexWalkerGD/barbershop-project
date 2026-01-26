@@ -23,10 +23,10 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
 
   return (
     <div>
-      <Card className="min-w-[460px] rounded-2xl">
-        <CardContent className="flex flex-row items-center gap-5 p-3">
+      <Card className="rounded-2xl">
+        <CardContent className="flex flex-row gap-3 py-2">
           {/* IMAGEM */}
-          <div className="relative h-[100px] w-[128px]">
+          <div className="relative flex h-[100px] flex-[3.2]">
             <Image
               alt={barbershop.name}
               fill
@@ -36,34 +36,30 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           </div>
 
           {/* TEXTO */}
-          <div className="flex w-full flex-row items-center justify-between px-1">
-            <div>
-              <h3 className="truncate font-semibold">{barbershop.name}</h3>
-              <p className="line-clamp-2 text-sm text-gray-400">
-                {barbershop.address}
-              </p>
-              <div className="flex flex-row gap-2">
-                <div className="h-8 w-8"></div>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <Button className="mt-3 w-full" asChild>
-                <Link href={`/schedules/${barbershop.id}`}>Ver horários</Link>
-              </Button>
+          <div className="flex flex-[4.8] flex-col py-4">
+            <h3 className="line-clamp-2 font-semibold">{barbershop.name}</h3>
+            <p className="line-clamp-2 text-sm text-gray-400">
+              {barbershop.address}
+            </p>
+          </div>
 
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="secondary" className="mt-3 w-full">
-                    <FaGear />
-                    Configurar
-                  </Button>
-                </SheetTrigger>
-                <SidebarConfig
-                  barbershop={barbershop}
-                  onSuccess={() => handleDeleteBarbershop(barbershop.id)}
-                />
-              </Sheet>
-            </div>
+          {/* BUTTONS */}
+          <div className="flex flex-[2] flex-col">
+            <Button className="mt-3" asChild>
+              <Link href={`/schedules/${barbershop.id}`}>Agenda</Link>
+            </Button>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="secondary" className="mt-3">
+                  <FaGear />
+                </Button>
+              </SheetTrigger>
+              <SidebarConfig
+                barbershop={barbershop}
+                onSuccess={() => handleDeleteBarbershop(barbershop.id)}
+              />
+            </Sheet>
           </div>
         </CardContent>
       </Card>

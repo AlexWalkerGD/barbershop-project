@@ -175,12 +175,12 @@ const NewBooking = ({
   }, [selectedDay, selectedEmployee])
 
   return (
-    <div className="flex w-full max-w-full flex-col gap-2 overflow-x-auto p-2 [&::-webkit-scrollbar]:hidden">
+    <div className="flex max-h-[100dvh] w-full max-w-full flex-col gap-2 overflow-y-auto p-2 [&::-webkit-scrollbar]:hidden">
       <DialogHeader>
         <DialogTitle>Novo agendamento</DialogTitle>
       </DialogHeader>
 
-      <div className="flex flex-col items-center gap-2 px-6 pt-4">
+      <div className="flex flex-col items-center gap-2 px-6">
         <DialogDescription>Descreva o cliente</DialogDescription>
         <Input
           placeholder="Nome"
