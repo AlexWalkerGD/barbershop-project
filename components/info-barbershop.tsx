@@ -24,7 +24,7 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   return (
     <div>
       <Card className="rounded-2xl">
-        <CardContent className="flex flex-row gap-3 py-2">
+        <CardContent className="flex flex-row gap-3 px-2 py-2">
           {/* IMAGEM */}
           <div className="relative flex h-[100px] flex-[3.2]">
             <Image
