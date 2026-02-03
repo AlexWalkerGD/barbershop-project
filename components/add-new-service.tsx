@@ -133,11 +133,7 @@ const AddNewService = ({
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
-          <Button
-            className="mx-28"
-            onClick={handleAddService}
-            disabled={loading}
-          >
+          <Button onClick={handleAddService} disabled={loading}>
             {loading ? "Criando..." : "Adicionar"}
           </Button>
         </div>

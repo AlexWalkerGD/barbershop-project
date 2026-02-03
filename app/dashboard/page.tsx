@@ -99,7 +99,10 @@ const Dashboard = () => {
                   +
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[90%]">
+              <DialogContent
+                className="w-[90%]"
+                onOpenAutoFocus={(event) => event.preventDefault()}
+              >
                 <NewBarber
                   dialogTitle="Nova barbearia"
                   dialogDescription="Descreva sua nova barbearia"

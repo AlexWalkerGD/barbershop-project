@@ -99,7 +99,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       <div className="flex items-center justify-between py-5">
         <div className="flex flex-row gap-3">
           <div>
-            <h2 className="line-clamp-2 text-base font-medium text-white">
+            <h2 className="line-clamp-2 text-[15px] font-medium text-white">
               {dataBarbershop.name}
             </h2>
             <p className="line-clamp-2 text-sm text-gray-400">
@@ -215,13 +215,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center justify-between px-3">
               <h2 className="pt-2 text-center font-bold">Produtos</h2>
-              <Button
-                variant="secondary"
-                className="mt-3"
-                onClick={() => {
-                  setAddNewService(true)
-                }}
-              >
+              <Button variant="secondary" className="mt-3">
                 + Novo
               </Button>
             </div>
@@ -286,7 +280,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         open={editBarbershop}
         onOpenChange={(open) => setEditBarbershop(open)}
       >
-        <DialogContent className="w-[90%]">
+        <DialogContent
+          className="w-[90%]"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
           <EditBarbershop
             barbershop={dataBarbershop}
             onSuccess={handleSuccess}
@@ -304,7 +301,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         open={addNewEmployee}
         onOpenChange={(open) => setAddNewEmployee(open)}
       >
-        <DialogContent className="w-[90%]">
+        <DialogContent
+          className="w-[90%]"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
           <AddNewEmployee
             barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewEmployee}
@@ -322,7 +322,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
         open={addNewService}
         onOpenChange={(open) => setAddNewService(open)}
       >
-        <DialogContent className="w-[90%]">
+        <DialogContent
+          className="w-[90%]"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+        >
           <AddNewService
             barbershopId={dataBarbershop.id}
             onSuccess={handleSuccessNewService}
