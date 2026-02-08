@@ -97,14 +97,14 @@ const Home = async () => {
         </div>
 
         {/* POPULARES */}
-        <h2 className="mb-3 mt-6 text-xs font-bold uppercase text-gray-400">
+        {/* <h2 className="mb-3 mt-6 text-xs font-bold uppercase text-gray-400">
           Populares
         </h2>
         <div className="flex gap-4 overflow-auto [&::-webkit-scrollbar]:hidden">
           {barbershops.map((barbershop) => (
             <BarberShopItem key={barbershop.id} barbershop={barbershop} />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   )

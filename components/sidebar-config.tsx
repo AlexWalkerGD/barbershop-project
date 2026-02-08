@@ -182,10 +182,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
             <div className="mx-2 flex flex-row justify-between rounded-sm bg-secondary p-[6px]">
-              <p className="pl-2">Serviço</p>
+              <p className="pl-2 text-sm">Serviço</p>
               <div className="flex flex-row items-center gap-5">
-                <p>Preço</p>
-                <p>Excluir</p>
+                <p className="text-sm">Preço</p>
+                <p className="text-sm">Excluir</p>
               </div>
             </div>
             {dataBarbershop.services?.map((ser) => {

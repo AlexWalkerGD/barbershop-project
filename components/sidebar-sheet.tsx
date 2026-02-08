@@ -4,7 +4,13 @@ import { quickSearchOptions } from "@/app/_constants/search"
 import { Button } from "./ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { CalendarIcon, HomeIcon, LogInIcon, LogOutIcon } from "lucide-react"
+import {
+  CalendarIcon,
+  GemIcon,
+  HomeIcon,
+  LogInIcon,
+  LogOutIcon,
+} from "lucide-react"
 import { SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet"
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog"
 import { signOut, useSession } from "next-auth/react"
@@ -83,8 +89,15 @@ const SidebarSheet = () => {
         ))}
       </div>
 
-      {data?.user && (
-        <div className="flex flex-col gap-2 border-b border-solid py-5">
+      <div className="flex flex-col gap-2 border-b border-solid py-5">
+        <Button className="justify-start gap-2" variant="ghost" asChild>
+          <Link href="/signature">
+            <GemIcon size={18} />
+            Torne-se Administrador
+          </Link>
+        </Button>
+
+        {data?.user && (
           <Button
             variant="ghost"
             className="justify-start gap-2"
@@ -93,8 +106,8 @@ const SidebarSheet = () => {
             <LogOutIcon size={18} />
             Sair da conta
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </SheetContent>
   )
 }

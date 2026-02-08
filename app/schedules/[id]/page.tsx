@@ -122,7 +122,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
       .catch((err) => console.error("Erro ao buscar barbershop:", err))
   }, [params.id, selectedDate, refreshKey])
 
-  if (!barbershop || !selectedEmployee) return <div>Carregando...</div>
+  if (!barbershop || !selectedEmployee) return <div></div>
 
   const bookingsToday = selectedEmployee.bookings.filter(
     (b: any) =>
@@ -185,10 +185,10 @@ export default function Schedules({ params }: { params: { id: string } }) {
               <h2 className="mt-10 text-xs font-bold uppercase text-gray-400">
                 {barbershop?.name}
               </h2>
-              <div className="flex flex-row justify-between gap-4">
+              <div className="flex flex-row justify-between gap-1">
                 <div
                   className={
-                    "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-6 ring-2 ring-secondary"
+                    "my-7 flex cursor-pointer flex-col items-center rounded-2xl px-2 ring-2 ring-secondary"
                   }
                 >
                   <div className="relative inline-block">
@@ -241,7 +241,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                     className="bg-transparent text-center text-[15px] hover:bg-transparent"
                     onClick={() => setOpen(!open)}
                   >
-                    {selected?.name ? `De: ${selected?.name}` : <div>De:</div>}
+                    {selected?.name ? ` ${selected?.name}` : <div>De:</div>}
                   </button>
 
                   {open && (
