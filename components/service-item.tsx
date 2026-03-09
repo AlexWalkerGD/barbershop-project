@@ -290,7 +290,7 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
                       />
                     </div>
                   )}
-                  <SheetFooter className="px-5">
+                  <SheetFooter className="px-5 lg:w-full">
                     <Button
                       onClick={handleCreateBooking}
                       disabled={!selectedDay || !selectedTime}

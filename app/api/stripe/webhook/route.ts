@@ -99,7 +99,6 @@ export async function POST(req: Request) {
           where: { id: userId },
           data: { role: "ADMIN" },
         })
-
         console.log("Subscription created/updated for user:", userId)
         break
       }

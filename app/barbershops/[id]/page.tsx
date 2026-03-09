@@ -17,7 +17,20 @@ const BarbershopPage = async ({ params }: { params: { id: string } }) => {
 
   if (!barbershop) return null
 
-  return <EmployeeSelector barbershop={barbershop} />
+  const employeeIds = barbershop.employees.map((employee) => employee.id)
+  const availability = employeeIds.length
+    ? await db.availability.findMany({
+        where: {
+          employeeId: {
+            in: employeeIds,
+          },
+        },
+      })
+    : []
+
+  return (
+    <EmployeeSelector barbershop={barbershop} availability={availability} />
+  )
 }
 
 export default BarbershopPage

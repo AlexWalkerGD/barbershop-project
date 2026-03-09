@@ -4,35 +4,53 @@
 
 @layer base {
   .dark {
-    --background: 225 9% 9%;
-    --foreground: 210 40% 98%;
+    --background: 220 15% 6%;
+    --foreground: 40 30% 92%;
 
-    --card: 228 9% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 12% 10%;
+    --card-foreground: 40 30% 92%;
 
-    --popover: 228 9% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 12% 10%;
+    --popover-foreground: 40 30% 92%;
 
-    --primary: 252 100% 69%;
-    --primary-foreground: 0 0% 100%;
+    /* DOURADO */
+    --primary: 42 65% 55%;
+    --primary-foreground: 220 15% 8%;
 
-    --secondary: 228 6% 16%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 10% 15%;
+    --secondary-foreground: 40 30% 92%;
 
-    --muted: 228 6% 16%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 10% 14%;
+    --muted-foreground: 40 15% 70%;
 
-    --accent: 228 6% 16%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 42 60% 45%;
+    --accent-foreground: 220 15% 8%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 228 6% 16%;
-    --input: 228 6% 16%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 10% 18%;
+    --input: 220 10% 18%;
+    --ring: 42 70% 55%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gold: 42 65% 55%;
+    --gold-muted: 38 50% 38%;
+    --gold-glow: 38 88% 65%;
+    --surface-1: 220 14% 9%;
+    --surface-2: 220 12% 13%;
+    --surface-3: 220 11% 17%;
+
+    --sidebar-background: 220 14% 9%;
+    --sidebar-foreground: 45 15% 94%;
+    --sidebar-primary: 38 88% 52%;
+    --sidebar-primary-foreground: 220 16% 5%;
+    --sidebar-accent: 220 12% 14%;
+    --sidebar-accent-foreground: 45 15% 94%;
+    --sidebar-border: 220 12% 16%;
+    --sidebar-ring: 38 88% 52%;
   }
 }
 
@@ -45,5 +63,91 @@
   }
   body {
     @apply h-full bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  .glow-gold {
+    box-shadow:
+      0 0 30px hsl(var(--gold) / 0.25),
+      0 0 60px hsl(var(--gold) / 0.1);
+  }
+
+  .glow-gold-sm {
+    box-shadow: 0 0 12px hsl(var(--gold) / 0.3);
+  }
+
+  .surface-1 {
+    background-color: hsl(var(--surface-1));
+  }
+
+  .surface-2 {
+    background-color: hsl(var(--surface-2));
+  }
+
+  .surface-3 {
+    background-color: hsl(var(--surface-3));
+  }
+
+  .gradient-gold {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gold)) 0%,
+      hsl(var(--gold-glow)) 100%
+    );
+  }
+
+  .gradient-dark {
+    background: linear-gradient(
+      180deg,
+      hsl(220 16% 5%) 0%,
+      hsl(220 14% 8%) 100%
+    );
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gold)) 0%,
+      hsl(var(--gold-glow)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-divider {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--gold) / 0.4),
+      transparent
+    );
+    height: 1px;
+  }
+
+  .card-premium {
+    background: hsl(var(--surface-1));
+    border: 1px solid hsl(var(--border));
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .card-premium:hover {
+    border-color: hsl(var(--gold) / 0.4);
+    box-shadow: 0 8px 32px hsl(var(--gold) / 0.08);
   }
 }

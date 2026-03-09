@@ -193,7 +193,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                 >
                   <div className="relative inline-block">
                     <Button
-                      className="bg-transparent hover:bg-transparent"
+                      className="bg-transparent text-primary hover:bg-transparent"
                       size="sm"
                       onClick={handleBookingClick}
                     >
@@ -238,7 +238,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                 </div>
                 <div className="relative my-7 flex cursor-pointer flex-col items-center justify-center rounded-2xl px-6 font-medium ring-2 ring-secondary">
                   <button
-                    className="bg-transparent text-center text-[15px] hover:bg-transparent"
+                    className="bg-transparent text-center text-[15px] text-primary hover:bg-transparent"
                     onClick={() => setOpen(!open)}
                   >
                     {selected?.name ? ` ${selected?.name}` : <div>De:</div>}

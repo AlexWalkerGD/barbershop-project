@@ -15,10 +15,23 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = user.role
       }
+
+      if (!token.id) return token
+
+      const dbUser = await db.user.findUnique({
+        where: {
+          id: token.id as string,
+        },
+      })
+
+      if (dbUser) {
+        token.role = dbUser.role
+      }
+
       return token
     },
+
     async session({ session, token }) {
       session.user = {
         ...session.user,
