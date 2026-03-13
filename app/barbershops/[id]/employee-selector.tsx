@@ -6,9 +6,8 @@ import Employee from "@/components/employee"
 import PhoneItem from "@/components/phone-item"
 import ServiceItem from "@/components/service-item"
 import { Button } from "@/components/ui/button"
-import { ChevronLeftIcon, MapPinIcon, MenuIcon, StarIcon } from "lucide-react"
+import { MapPinIcon, MenuIcon, StarIcon } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import SidebarSheet from "@/components/sidebar-sheet"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { Card, CardContent } from "@/components/ui/card"
@@ -102,13 +101,7 @@ const EmployeeSelector = ({
     <>
       <div className="lg:px-[100px]">
         {/* DESKTOP NAVBAR */}
-        <div className="hidden lg:flex lg:items-center lg:justify-between lg:py-6">
-          <Button size="icon" variant="secondary" asChild>
-            <Link href="/">
-              <ChevronLeftIcon />
-            </Link>
-          </Button>
-
+        <div className="hidden lg:flex lg:items-center lg:justify-end lg:py-6">
           <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline">
@@ -128,17 +121,6 @@ const EmployeeSelector = ({
               fill
               className="object-cover"
             />
-
-            <Button
-              size="icon"
-              variant="secondary"
-              className="absolute left-4 top-4"
-              asChild
-            >
-              <Link href="/">
-                <ChevronLeftIcon />
-              </Link>
-            </Button>
 
             <Sheet>
               <SheetTrigger asChild>
@@ -268,7 +250,7 @@ const EmployeeSelector = ({
               <h2 className="text-xs font-bold uppercase text-gray-400">
                 Serviços
               </h2>
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6 gap-3 lg:grid lg:grid-cols-3">
                 {barbershop.services.map((service: any) => (
                   <ServiceItem
                     key={service.id}

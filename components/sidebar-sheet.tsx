@@ -1,8 +1,5 @@
 "use client"
-
-import { quickSearchOptions } from "@/app/_constants/search"
 import { Button } from "./ui/button"
-import Image from "next/image"
 import Link from "next/link"
 import {
   CalendarIcon,
@@ -71,7 +68,7 @@ const SidebarSheet = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2 border-b border-solid py-5">
+      {/* <div className="flex flex-col gap-2 border-b border-solid py-5">
         {quickSearchOptions.map((option) => (
           <SheetClose key={option.title} asChild>
             <Button className="justify-start gap-2" variant="ghost" asChild>
@@ -87,7 +84,7 @@ const SidebarSheet = () => {
             </Button>
           </SheetClose>
         ))}
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-2 border-b border-solid py-5">
         <Button className="justify-start gap-2" variant="ghost" asChild>

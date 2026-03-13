@@ -221,79 +221,90 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
                   Reservar
                 </Button>
 
-                <SheetContent className="px-0">
-                  <SheetHeader>
-                    <SheetTitle>Fazer Reserva</SheetTitle>
+                <SheetContent
+                  side="right"
+                  className="flex w-full flex-col p-5 sm:max-w-[420px]"
+                >
+                  {/* HEADER */}
+                  <SheetHeader className="text-center">
+                    <SheetTitle className="text-center">
+                      Fazer Reserva
+                    </SheetTitle>
                   </SheetHeader>
 
-                  <div className="border-b border-solid py-5">
-                    <Calendar
-                      mode="single"
-                      locale={ptBR}
-                      selected={selectedDay}
-                      onSelect={setSelectedDay}
-                      disabled={disabledDays}
-                      styles={{
-                        head_cell: {
-                          width: "100%",
-                        },
-                        cell: {
-                          width: "100%",
-                        },
-                        button: {
-                          width: "100%",
-                        },
-                        nav_button_previous: {
-                          width: "32px",
-                          height: "32px",
-                        },
-                        nav_button_next: {
-                          width: "32px",
-                          height: "32px",
-                        },
-                        caption: {
-                          textTransform: "capitalize",
-                        },
-                      }}
-                    />
+                  {/* SCROLL AREA */}
+                  <div className="flex-1 overflow-y-auto">
+                    {/* CALENDAR */}
+                    <div className="flex justify-center border-b py-5">
+                      <div className="w-[250px]">
+                        <Calendar
+                          mode="single"
+                          locale={ptBR}
+                          selected={selectedDay}
+                          onSelect={setSelectedDay}
+                          disabled={disabledDays}
+                          styles={{
+                            head_cell: { width: "100%" },
+                            cell: { width: "100%" },
+                            button: { width: "100%" },
+                            nav_button_previous: {
+                              width: "32px",
+                              height: "32px",
+                            },
+                            nav_button_next: {
+                              width: "32px",
+                              height: "32px",
+                            },
+                            caption: {
+                              textTransform: "capitalize",
+                            },
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* TIMES */}
+                    {selectedDay && (
+                      <div className="flex gap-2 overflow-x-auto p-5 [&::-webkit-scrollbar]:hidden">
+                        {availableTimes.length > 0 ? (
+                          availableTimes.map((time) => (
+                            <Button
+                              key={time}
+                              variant={
+                                selectedTime === time ? "default" : "outline"
+                              }
+                              className="rounded-full"
+                              onClick={() => setSelectedTime(time)}
+                            >
+                              {time}
+                            </Button>
+                          ))
+                        ) : (
+                          <p className="text-xs">
+                            Não há horários disponíveis para este dia.
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SUMMARY */}
+                    {selectedDate && (
+                      <div className="p-5">
+                        <BookingSummary
+                          barbershop={barbershop}
+                          service={service}
+                          selectedDate={selectedDate}
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  {selectedDay && (
-                    <div className="flex gap-2 overflow-x-auto p-5 [&::-webkit-scrollbar]:hidden">
-                      {availableTimes.length > 0 ? (
-                        availableTimes.map((time) => (
-                          <Button
-                            key={time}
-                            variant={
-                              selectedTime === time ? "default" : "outline"
-                            }
-                            className="rounded-full"
-                            onClick={() => setSelectedTime(time)}
-                          >
-                            {time}
-                          </Button>
-                        ))
-                      ) : (
-                        <p className="text-xs">
-                          Não há horários disponíveis para este dia.
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedDate && (
-                    <div className="p-5">
-                      <BookingSummary
-                        barbershop={barbershop}
-                        service={service}
-                        selectedDate={selectedDate}
-                      />
-                    </div>
-                  )}
-                  <SheetFooter className="px-5 lg:w-full">
+                  {/* FOOTER */}
+                  <SheetFooter className="px-5 pb-5">
                     <Button
                       onClick={handleCreateBooking}
                       disabled={!selectedDay || !selectedTime}
+                      className="w-full"
                     >
                       Confirmar
                     </Button>
