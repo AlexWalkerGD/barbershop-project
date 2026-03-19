@@ -91,7 +91,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   }
 
   return (
-    <SheetContent className="max-h-[100dvh] overflow-y-auto">
+    <SheetContent
+      side="right"
+      className="flex w-full flex-col overflow-y-auto p-5 sm:max-w-[420px]"
+    >
       <SheetHeader>
         <SheetTitle className="text-left">Configurações</SheetTitle>
       </SheetHeader>
@@ -211,7 +214,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           </div>
         </Card>
 
-        <Card className="mt-5">
+        {/* <Card className="mt-5">
           <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center justify-between px-3">
               <h2 className="pt-2 text-center font-bold">Produtos</h2>
@@ -221,7 +224,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="mt-5">
           <div className="flex flex-col gap-2">

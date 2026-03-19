@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useEffect, useMemo, useState } from "react"
-import { DialogHeader, DialogDescription, DialogTitle } from "./ui/dialog"
+import { DialogHeader, DialogTitle } from "./ui/dialog"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
@@ -48,7 +48,6 @@ const NewBooking = ({
   onSuccess,
 }: NewBookingProps) => {
   const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
   const [selectedDay, setSelectedDay] = useState(new Date())
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
   const [selectedService, setSelectedService] = useState<any>(null)
@@ -144,7 +143,6 @@ const NewBooking = ({
     try {
       if (!selectedDate) return
       if (!name) return toast.error("Nome obrigatório")
-      if (!email) return toast.error("Email obrigatório")
       if (!selectedEmployee) return toast.error("Selecione um funcionário")
       if (!selectedService) return toast.error("Selecione um serviço")
 
@@ -152,7 +150,7 @@ const NewBooking = ({
         serviceId: selectedService.id,
         date: selectedDate,
         employeeId: selectedEmployee.id,
-        user: { id: "crie", name: name, email: email },
+        user: { id: "crie", name: name, email: " " },
       })
       toast.success("Reserva criada com sucesso!", {})
       onSuccess()
@@ -180,8 +178,7 @@ const NewBooking = ({
         <DialogTitle>Novo agendamento</DialogTitle>
       </DialogHeader>
 
-      <div className="flex flex-col items-center gap-2 px-6">
-        <DialogDescription>Descreva o cliente</DialogDescription>
+      <div className="flex flex-col items-center gap-2 px-6 pt-3">
         <Input
           placeholder="Nome"
           value={name}
@@ -189,21 +186,13 @@ const NewBooking = ({
           required
         />
 
-        <Input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <h2 className="text-sm text-[#94A3B8]">Escolha um funcionário</h2>
-
         <div className="relative inline-block">
           <Button
-            className="bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
+            className="bg-transparent px-10 text-[#94A3B8] ring-1 ring-secondary hover:bg-transparent"
             size="sm"
             onClick={() => setEmployeeSelectOpen(!employeeSelectOpen)}
           >
-            {selectedEmployee?.name ?? "Selecione"}
+            {selectedEmployee?.name ?? "Escolha um funcionário"}
           </Button>
 
           {employeeSelectOpen && (
@@ -224,9 +213,7 @@ const NewBooking = ({
           )}
         </div>
 
-        <h2 className="text-sm text-[#94A3B8]">Selecione a data</h2>
-
-        <div className="relative inline-block rounded-xl p-2 ring-2 ring-secondary">
+        <div className="relative inline-block rounded-xl p-1 ring-1 ring-secondary">
           <Calendar
             mode="single"
             locale={ptBR}
@@ -259,7 +246,7 @@ const NewBooking = ({
           />
         </div>
         {selectedEmployee && selectedDay && (
-          <div className="flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto border-x-2 p-2 [&::-webkit-scrollbar]:hidden">
             {availableTimes.length > 0 ? (
               availableTimes.map((time) => (
                 <Button
@@ -279,15 +266,13 @@ const NewBooking = ({
           </div>
         )}
 
-        <h2 className="text-sm text-[#94A3B8]">Escolha um serviço</h2>
-
         <div className="relative inline-block">
           <Button
-            className="flex bg-transparent px-28 ring-1 ring-secondary hover:bg-transparent"
+            className="flex bg-transparent px-10 text-[#94A3B8] ring-1 ring-secondary hover:bg-transparent"
             size="sm"
             onClick={() => setServiceSelectOpen(!serviceSelectOpen)}
           >
-            {selectedService?.name ?? "Selecione"}
+            {selectedService?.name ?? "Escolha um serviço"}
           </Button>
           {serviceSelectOpen && (
             <div className="absolute top-full z-50 mt-1 w-[150px] border border-secondary bg-secondary shadow-lg">
@@ -307,7 +292,7 @@ const NewBooking = ({
           )}
         </div>
         <Button
-          className="mt-4"
+          className="mt-2"
           onClick={handleCreateBooking}
           disabled={!selectedEmployee || !selectedDay || !selectedTime}
         >

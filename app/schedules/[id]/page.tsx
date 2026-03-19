@@ -89,6 +89,22 @@ export default function Schedules({ params }: { params: { id: string } }) {
     : []
 
   useEffect(() => {
+    if (!params.id || !selectedDate) return
+
+    const isoDate = selectedDate.toISOString()
+
+    fetch(`/api/barbershop/${params.id}?date=${isoDate}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setBarbershop(data)
+
+        if (!selectedEmployee && data.employees.length > 0) {
+          setSelectedEmployee(data.employees[0])
+        }
+      })
+  }, [params.id, selectedDate, refreshKey])
+
+  useEffect(() => {
     if (!dayAvailability) {
       console.log("Nenhuma disponibilidade para", weekDay)
       return
@@ -168,7 +184,10 @@ export default function Schedules({ params }: { params: { id: string } }) {
                     +
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-[90%]">
+                <DialogContent
+                  className="w-[90%]"
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                >
                   {barbershop && (
                     <NewBooking
                       barbershop={barbershop}

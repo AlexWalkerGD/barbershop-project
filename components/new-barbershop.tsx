@@ -114,7 +114,7 @@ const NewBarbershop = ({
             />
             {index < 1 && (
               <Button type="button" onClick={addPhones}>
-                + Adicionar telefone
+                + Novo
               </Button>
             )}
 
