@@ -33,13 +33,13 @@ const Signature = () => {
             <h1 className="text-xl font-bold">
               Acesso completo aos serviços de agendamento
             </h1>
-            <p className="text-sm text-stone-300">
+            <p className="text-sm text-muted-foreground">
               Desbloqueie uma experiência premium para organizar sua agenda e
               atender mais clientes sem esforço.
             </p>
           </div>
 
-          <div className="mt-6 space-y-3 text-sm text-stone-300">
+          <div className="mt-6 space-y-3 text-sm text-muted-foreground">
             <div className="flex items-start gap-3">
               <div className="mt-1 h-2 w-2 rounded-full bg-primary" />
               <p>
@@ -59,17 +59,19 @@ const Signature = () => {
           </div>
 
           <div className="mt-8 flex items-center justify-between gap-4">
-            <div className="text-sm text-stone-300">
+            <div className="text-sm text-muted-foreground">
               <div className="flex flex-row items-end gap-1">
                 <h2 className="text-2xl font-bold">€60</h2>
-                <h2 className="text-sm font-bold text-gray-300">/mês</h2>
+                <h2 className="text-sm font-bold text-muted-foreground">
+                  /mês
+                </h2>
               </div>
               <p className="text-xs">
                 Cancele quando quiser. Sem taxas escondidas.
               </p>
             </div>
             <Button
-              className="bg-primary font-semibold text-white"
+              className="bg-primary font-semibold text-primary-foreground"
               onClick={handleSubscribeClick}
             >
               Assinar

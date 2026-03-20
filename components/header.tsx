@@ -6,6 +6,7 @@ import { FaScissors } from "react-icons/fa6"
 import { Sheet, SheetTrigger } from "./ui/sheet"
 import SidebarSheet from "./sidebar-sheet"
 import Link from "next/link"
+import ThemeToggle from "./theme-toggle"
 
 const Header = () => {
   return (
@@ -21,14 +22,17 @@ const Header = () => {
           </div>
         </Link>
 
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button size="icon" variant="outline">
-              <MenuIcon />
-            </Button>
-          </SheetTrigger>
-          <SidebarSheet />
-        </Sheet>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline">
+                <MenuIcon />
+              </Button>
+            </SheetTrigger>
+            <SidebarSheet />
+          </Sheet>
+        </div>
       </CardContent>
     </Card>
   )

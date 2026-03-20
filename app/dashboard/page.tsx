@@ -111,7 +111,7 @@ const Dashboard = () => {
               </DialogContent>
             </Dialog>
           </div>
-          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-gray-400">
+          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
             Minhas barbearias
           </h2>
 

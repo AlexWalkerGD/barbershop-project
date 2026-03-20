@@ -201,7 +201,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
               </Dialog>
             </div>
             <div key={refreshKey}>
-              <h2 className="mt-10 text-xs font-bold uppercase text-gray-400">
+              <h2 className="mt-10 text-xs font-bold uppercase text-muted-foreground">
                 {barbershop?.name}
               </h2>
               <div className="flex flex-row justify-between gap-1">
@@ -293,7 +293,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                     return (
                       <div
                         key={slot.toISOString()}
-                        className="h-[70px] pt-2 font-semibold text-gray-400"
+                        className="h-[70px] pt-2 font-semibold text-muted-foreground"
                       >
                         <div>{format(slot, "HH:mm")}</div>
                       </div>
@@ -325,12 +325,12 @@ export default function Schedules({ params }: { params: { id: string } }) {
                               <div className="text-[14px]">
                                 {booking.userName}
                               </div>
-                              <div className="text-[12px] text-white">
+                              <div className="text-[12px] text-primary-foreground">
                                 {booking.serviceName}
                               </div>
                             </>
                           ) : (
-                            <div className="text-[12px] text-white"></div>
+                            <div className="text-[12px] text-primary-foreground"></div>
                           )}
                         </div>
                       </div>

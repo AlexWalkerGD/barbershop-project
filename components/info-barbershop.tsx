@@ -38,7 +38,7 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           {/* TEXTO */}
           <div className="flex flex-[4.8] flex-col py-4">
             <h3 className="line-clamp-2 font-semibold">{barbershop.name}</h3>
-            <p className="line-clamp-2 text-sm text-gray-400">
+            <p className="line-clamp-2 text-sm text-muted-foreground">
               {barbershop.address}
             </p>
           </div>

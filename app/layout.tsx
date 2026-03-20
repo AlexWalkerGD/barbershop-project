@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import AuthProvider from "./_providers/auth"
+import ThemeProvider from "./_providers/theme"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,24 +28,27 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt" translate="no" className="dark">
+    <html lang="pt" translate="no" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <div className="flex h-full flex-col">
-            <div className="flex-1">{children}</div>
-            <footer>
-              <Card>
-                <CardContent className="px-5 py-6">
-                  <p className="text-sm text-gray-400">
-                    © 2023 Copyright <span className="font-bold">TEMPUS</span>
-                  </p>
-                </CardContent>
-              </Card>
-            </footer>
-          </div>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="flex h-full flex-col">
+              <div className="flex-1">{children}</div>
+              <footer>
+                <Card>
+                  <CardContent className="px-5 py-6">
+                    <p className="text-sm text-muted-foreground">
+                      © 2023 Copyright{" "}
+                      <span className="font-bold">TEMPUS</span>
+                    </p>
+                  </CardContent>
+                </Card>
+              </footer>
+            </div>
+          </AuthProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

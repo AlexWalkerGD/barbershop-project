@@ -102,10 +102,10 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       <div className="flex items-center justify-between py-5">
         <div className="flex flex-row gap-3">
           <div>
-            <h2 className="line-clamp-2 text-[15px] font-medium text-white">
+            <h2 className="line-clamp-2 text-[15px] font-medium text-foreground">
               {dataBarbershop.name}
             </h2>
-            <p className="line-clamp-2 text-sm text-gray-400">
+            <p className="line-clamp-2 text-sm text-muted-foreground">
               {dataBarbershop.address}
             </p>
           </div>

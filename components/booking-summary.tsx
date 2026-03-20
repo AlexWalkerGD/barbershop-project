@@ -28,7 +28,7 @@ const BookingSummary = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-gray-400">Data</h2>
+          <h2 className="text-sm text-muted-foreground">Data</h2>
           <p className="text-sm">
             {format(selectedDate, "d 'de' MMMM", {
               locale: ptBR,
@@ -37,12 +37,12 @@ const BookingSummary = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-gray-400">Horário</h2>
+          <h2 className="text-sm text-muted-foreground">Horário</h2>
           <p className="text-sm">{format(selectedDate, "HH:mm")}</p>
         </div>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-gray-400">Barbearia</h2>
+          <h2 className="text-sm text-muted-foreground">Barbearia</h2>
           <p className="text-sm">{barbershop.name}</p>
         </div>
       </CardContent>

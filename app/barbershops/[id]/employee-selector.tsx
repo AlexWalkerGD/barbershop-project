@@ -149,14 +149,14 @@ const EmployeeSelector = ({
           </div>
 
           <div className="space-y-2 border-b border-solid p-5">
-            <h2 className="text-xs font-bold uppercase text-gray-400">
+            <h2 className="text-xs font-bold uppercase text-muted-foreground">
               Sobre nós
             </h2>
             <p className="text-justify text-sm">{barbershop?.description}</p>
           </div>
 
           <div className="flex flex-col gap-2 border-b border-solid p-5">
-            <h2 className="mb-2 text-xs font-bold uppercase text-gray-400">
+            <h2 className="mb-2 text-xs font-bold uppercase text-muted-foreground">
               Funcionários
             </h2>
             <div className="flex flex-row gap-3">
@@ -172,7 +172,7 @@ const EmployeeSelector = ({
           </div>
 
           <div className="space-y-3 border-b border-solid p-5">
-            <h2 className="text-xs font-bold uppercase text-gray-400">
+            <h2 className="text-xs font-bold uppercase text-muted-foreground">
               Serviços
             </h2>
             <div className="mt-6 space-y-3">
@@ -231,7 +231,7 @@ const EmployeeSelector = ({
             </div>
 
             <div className="flex flex-col gap-2 border-b border-solid py-6">
-              <h2 className="mb-2 text-xs font-bold uppercase text-gray-400">
+              <h2 className="mb-2 text-xs font-bold uppercase text-muted-foreground">
                 Funcionários
               </h2>
               <div className="flex flex-row gap-3">
@@ -247,7 +247,7 @@ const EmployeeSelector = ({
             </div>
 
             <div className="space-y-3 border-b border-solid py-6">
-              <h2 className="text-xs font-bold uppercase text-gray-400">
+              <h2 className="text-xs font-bold uppercase text-muted-foreground">
                 Serviços
               </h2>
               <div className="mt-6 gap-3 lg:grid lg:grid-cols-3">
@@ -286,7 +286,7 @@ const EmployeeSelector = ({
                 </Card>
               </div>
               <div className="space-y-3 border-b border-solid px-2 py-5">
-                <h2 className="mb-3 mt-5 text-xs font-bold uppercase text-gray-400">
+                <h2 className="mb-3 mt-5 text-xs font-bold uppercase text-muted-foreground">
                   Sobre nós
                 </h2>
                 <p className="text-sm">{barbershop?.description ?? ""}</p>
