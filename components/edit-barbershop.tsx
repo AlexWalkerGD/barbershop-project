@@ -1,12 +1,15 @@
 "use client"
 
 import React, { useState } from "react"
-import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "./ui/input"
 import { toast } from "sonner"
+
 import { updatedBarbershop } from "@/app/_actions/upgrade-barbeshop"
 import { BarbershopWithRelations, Employee, UserInfo } from "@/lib/barbershop"
+import { Button } from "@/components/ui/button"
+
+import ImageUploadInput from "./image-upload-input"
+import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Input } from "./ui/input"
 
 interface BarbershopState {
   id: string
@@ -38,11 +41,12 @@ const EditBarbershop = ({
   onSuccess,
   onUpdate,
 }: BarbershopItemProps) => {
-  const [name, setName] = useState("")
-  const [address, setAddress] = useState("")
-  const [description, setDescription] = useState("")
-  const [phones, setPhones] = useState<string[]>([""])
-  const [image, setImage] = useState("")
+  const [name, setName] = useState(barbershop.name)
+  const [address, setAddress] = useState(barbershop.address)
+  const [description, setDescription] = useState(barbershop.description)
+  const [phones, setPhones] = useState<string[]>(barbershop.phones)
+  const [image, setImage] = useState(barbershop.imageUrl)
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   const addPhones = () => {
     setPhones([...phones, ""])
@@ -59,38 +63,40 @@ const EditBarbershop = ({
   }
 
   const handleResetInputs = () => {
-    setName("")
-    setDescription("")
-    setAddress("")
-    setPhones([""])
-    setImage("")
+    setName(barbershop.name)
+    setDescription(barbershop.description)
+    setAddress(barbershop.address)
+    setPhones(barbershop.phones)
+    setImage(barbershop.imageUrl)
   }
 
-  const handleCreateBarbershop = async () => {
+  const handleEditBarbershop = async () => {
     try {
       if (!name) return toast.error("Nome obrigatório")
-      if (!description) return toast.error("Descrição obrigatório")
+      if (!description) return toast.error("Descrição obrigatória")
       if (!address) return toast.error("Endereço obrigatório")
 
       const phoneRegex = /^\d{9}$/
       const hasValidPhone = phones.some((phone) => phoneRegex.test(phone))
+
       if (!hasValidPhone) return toast.error("Telefone obrigatório")
-      if (!image) return toast.error("Imagem obrigatório")
+      if (isImageUploading) return toast.error("Aguarde o envio da imagem")
+      if (!image) return toast.error("Imagem obrigatória")
 
       await updatedBarbershop({
         id: barbershop.id,
-        name: name,
-        description: description,
-        address: address,
-        phones: phones,
+        name,
+        description,
+        address,
+        phones,
         imageUrl: image,
       })
 
       onUpdate({
-        name: name,
-        description: description,
-        address: address,
-        phones: phones,
+        name,
+        description,
+        address,
+        phones,
         imageUrl: image,
       })
 
@@ -108,7 +114,7 @@ const EditBarbershop = ({
     <div>
       <DialogHeader>
         <DialogTitle>Edite sua barbearia</DialogTitle>
-        <DialogDescription>Faça suas alteraçoes</DialogDescription>
+        <DialogDescription>Faça suas alterações</DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-4 px-6 pt-4">
@@ -133,14 +139,15 @@ const EditBarbershop = ({
           required
         />
 
-        {phones.map((phones, index) => (
+        {phones.map((phone, index) => (
           <div key={index} className="flex gap-2">
             <Input
               placeholder="Telefone"
-              value={phones}
+              value={phone}
               onChange={(e) => updatePhones(index, e.target.value)}
               required
             />
+
             {index < 1 && (
               <Button type="button" onClick={addPhones}>
                 + Adicionar telefone
@@ -159,13 +166,16 @@ const EditBarbershop = ({
           </div>
         ))}
 
-        <Input
-          placeholder="Imagem (URL)"
+        <ImageUploadInput
           value={image}
-          onChange={(e) => setImage(e.target.value)}
+          onChange={setImage}
+          inputId={`edit-barbershop-image-${barbershop.id}`}
+          onUploadingChange={setIsImageUploading}
         />
 
-        <Button onClick={handleCreateBarbershop}>Adicionar</Button>
+        <Button onClick={handleEditBarbershop} disabled={isImageUploading}>
+          Salvar
+        </Button>
       </div>
     </div>
   )

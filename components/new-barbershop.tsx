@@ -1,11 +1,14 @@
 "use client"
 
 import React, { useState } from "react"
-import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Button } from "@/components/ui/button"
-import { createBarbershop } from "@/app/_actions/create-barbershop"
-import { Input } from "./ui/input"
 import { toast } from "sonner"
+
+import { createBarbershop } from "@/app/_actions/create-barbershop"
+import { Button } from "@/components/ui/button"
+
+import ImageUploadInput from "./image-upload-input"
+import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Input } from "./ui/input"
 
 interface NewBarbershopProps {
   dialogTitle: string
@@ -23,6 +26,7 @@ const NewBarbershop = ({
   const [description, setDescription] = useState("")
   const [phones, setPhones] = useState<string[]>([""])
   const [image, setImage] = useState("")
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   const addPhones = () => {
     setPhones([...phones, ""])
@@ -49,19 +53,21 @@ const NewBarbershop = ({
   const handleCreateBarbershop = async () => {
     try {
       if (!name) return toast.error("Nome obrigatório")
-      if (!description) return toast.error("Descrição obrigatório")
+      if (!description) return toast.error("Descrição obrigatória")
       if (!address) return toast.error("Endereço obrigatório")
 
       const phoneRegex = /^\d{9}$/
       const hasValidPhone = phones.some((phone) => phoneRegex.test(phone))
+
       if (!hasValidPhone) return toast.error("Telefone obrigatório")
-      if (!image) return toast.error("Imagem obrigatório")
+      if (isImageUploading) return toast.error("Aguarde o envio da imagem")
+      if (!image) return toast.error("Imagem obrigatória")
 
       await createBarbershop({
-        name: name,
-        description: description,
-        address: address,
-        phones: phones,
+        name,
+        description,
+        address,
+        phones,
         imageUrl: image,
       })
 
@@ -104,14 +110,15 @@ const NewBarbershop = ({
           required
         />
 
-        {phones.map((phones, index) => (
+        {phones.map((phone, index) => (
           <div key={index} className="flex gap-2">
             <Input
               placeholder="Telefone"
-              value={phones}
+              value={phone}
               onChange={(e) => updatePhones(index, e.target.value)}
               required
             />
+
             {index < 1 && (
               <Button type="button" onClick={addPhones}>
                 + Novo
@@ -130,13 +137,16 @@ const NewBarbershop = ({
           </div>
         ))}
 
-        <Input
-          placeholder="Imagem (URL)"
+        <ImageUploadInput
           value={image}
-          onChange={(e) => setImage(e.target.value)}
+          onChange={setImage}
+          inputId="new-barbershop-image"
+          onUploadingChange={setIsImageUploading}
         />
 
-        <Button onClick={handleCreateBarbershop}>Adicionar</Button>
+        <Button onClick={handleCreateBarbershop} disabled={isImageUploading}>
+          Adicionar
+        </Button>
       </div>
     </div>
   )

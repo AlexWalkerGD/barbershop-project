@@ -1,11 +1,14 @@
 "use client"
 
 import React, { useState } from "react"
-import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "./ui/input"
 import { toast } from "sonner"
+
 import { Employee, UserInfo } from "@/lib/barbershop"
+import { Button } from "@/components/ui/button"
+
+import ImageUploadInput from "./image-upload-input"
+import { DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Input } from "./ui/input"
 
 interface BarbershopState {
   id: string
@@ -47,18 +50,21 @@ const AddNewEmployee = ({
   const [email, setEmail] = useState("")
   const [image, setImage] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   const handleAddEmployee = async () => {
     if (!name) return toast.error("Nome obrigatório")
     if (!email) return toast.error("Email obrigatório")
-    if (!image) return toast.error("Imagem obrigatório")
+    if (isImageUploading) return toast.error("Aguarde o envio da imagem")
+    if (!image) return toast.error("Imagem obrigatória")
+
     setLoading(true)
 
     const newUser: UserInfo = {
       id: crypto.randomUUID(),
-      name: name,
-      email: email,
-      image: image,
+      name,
+      email,
+      image,
     }
 
     const newEmployee = {
@@ -72,7 +78,9 @@ const AddNewEmployee = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, image, email, barbershopId }),
       })
+
       if (!res.ok) throw new Error("Erro ao criar colaborador")
+
       toast.success("Colaborador adicionado com sucesso!")
       setName("")
       setEmail("")
@@ -92,7 +100,7 @@ const AddNewEmployee = ({
   }
 
   return (
-    <div className="">
+    <div>
       <DialogHeader>
         <DialogTitle>Novo Colaborador</DialogTitle>
         <DialogDescription>
@@ -108,19 +116,26 @@ const AddNewEmployee = ({
           onChange={(e) => setName(e.target.value)}
           required
         />
+
         <Input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Input
-          type="url"
-          placeholder="Imagem"
+
+        <ImageUploadInput
           value={image}
-          onChange={(e) => setImage(e.target.value)}
+          onChange={setImage}
+          inputId={`employee-image-${barbershopId}`}
+          label="Foto do colaborador"
+          onUploadingChange={setIsImageUploading}
         />
-        <Button onClick={handleAddEmployee} disabled={loading}>
+
+        <Button
+          onClick={handleAddEmployee}
+          disabled={loading || isImageUploading}
+        >
           {loading ? "Criando..." : "Adicionar"}
         </Button>
       </div>

@@ -1,5 +1,10 @@
 import React, { useState } from "react"
 import { toast } from "sonner"
+
+import { Employee, UserInfo } from "@/lib/barbershop"
+import { Button } from "@/components/ui/button"
+
+import ImageUploadInput from "./image-upload-input"
 import {
   Dialog,
   DialogDescription,
@@ -7,8 +12,6 @@ import {
   DialogTitle,
 } from "./ui/dialog"
 import { Input } from "./ui/input"
-import { Button } from "./ui/button"
-import { Employee, UserInfo } from "@/lib/barbershop"
 
 interface BarbershopState {
   id: string
@@ -51,12 +54,15 @@ const AddNewService = ({
   const [imageUrl, setImageUrl] = useState("")
   const [price, setPrice] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
+  const [showImageUpload, setShowImageUpload] = useState(false)
 
   const handleAddService = async () => {
     if (!name) return toast.error("Nome obrigatório")
-    if (!description) return toast.error("Descrição obrigatório")
-    if (!imageUrl) return toast.error("Imagem obrigatório")
+    if (!description) return toast.error("Descrição obrigatória")
     if (!price) return toast.error("Preço obrigatório")
+    if (isImageUploading) return toast.error("Aguarde o envio da imagem")
+
     setLoading(true)
 
     try {
@@ -65,18 +71,21 @@ const AddNewService = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          imageUrl,
+          imageUrl: imageUrl || null,
           description,
           price,
           barbershopId,
         }),
       })
+
       if (!res.ok) throw new Error("Erro ao criar serviço")
+
       toast.success("Serviço adicionado com sucesso!")
       setName("")
       setDescription("")
       setPrice("")
       setImageUrl("")
+      setShowImageUpload(false)
       onSuccess()
 
       onAddItem((prev) => ({
@@ -105,8 +114,9 @@ const AddNewService = ({
       <Dialog>
         <DialogHeader>
           <DialogTitle>Novo Serviço</DialogTitle>
-          <DialogDescription>Adicione um novo serviço </DialogDescription>
+          <DialogDescription>Adicione um novo serviço</DialogDescription>
         </DialogHeader>
+
         <div className="flex flex-col gap-4 px-6 pt-4">
           <Input
             type="text"
@@ -115,25 +125,47 @@ const AddNewService = ({
             onChange={(e) => setName(e.target.value)}
             required
           />
+
           <Input
             type="text"
             placeholder="Descrição"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <Input
-            type="url"
-            placeholder="Imagem"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-          />
+
+          <div className="space-y-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowImageUpload((prev) => !prev)}
+            >
+              {showImageUpload
+                ? "Remover imagem opcional"
+                : "Adicionar imagem opcional"}
+            </Button>
+
+            {showImageUpload && (
+              <ImageUploadInput
+                value={imageUrl}
+                onChange={setImageUrl}
+                inputId={`service-image-${barbershopId}`}
+                label="Imagem do serviço"
+                onUploadingChange={setIsImageUploading}
+              />
+            )}
+          </div>
+
           <Input
             type="number"
             placeholder="Preço"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
-          <Button onClick={handleAddService} disabled={loading}>
+
+          <Button
+            onClick={handleAddService}
+            disabled={loading || isImageUploading}
+          >
             {loading ? "Criando..." : "Adicionar"}
           </Button>
         </div>

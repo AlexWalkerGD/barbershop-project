@@ -24,6 +24,7 @@ import { DialogContent } from "./ui/dialog"
 import BookingSummary from "./booking-summary"
 import { useRouter } from "next/navigation"
 import { getBookings } from "@/app/_actions/get_bookings"
+import { ImageIcon } from "lucide-react"
 
 interface ServiceItemProps {
   service: BarbershopService
@@ -189,12 +190,18 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
         <CardContent className="flex items-center gap-3 p-3">
           {/* IMAGEM */}
           <div className="relative max-h-[110px] min-h-[110px] min-w-[110px] max-w-[110px]">
-            <Image
-              alt={service.name}
-              src={service.imageUrl}
-              fill
-              className="rounded-lg object-cover"
-            />
+            {service.imageUrl ? (
+              <Image
+                alt={service.name}
+                src={service.imageUrl}
+                fill
+                className="rounded-lg object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                <ImageIcon className="h-6 w-6" />
+              </div>
+            )}
           </div>
 
           {/* DIREITA */}

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const service = await db.barbershopService.create({
       data: {
         name,
-        imageUrl,
+        imageUrl: imageUrl || null,
         description,
         price,
         barbershopId,
