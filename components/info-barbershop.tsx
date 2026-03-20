@@ -8,6 +8,7 @@ import { Sheet, SheetTrigger } from "./ui/sheet"
 import SidebarConfig from "./sidebar-config"
 import { toast } from "sonner"
 import { deleteBarbershop } from "@/app/_actions/delete-barbershop"
+import CopyBarbershopLink from "./copy-barbershop-link"
 
 const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const handleDeleteBarbershop = async (barbershopsId: string) => {
@@ -36,7 +37,7 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           </div>
 
           {/* TEXTO */}
-          <div className="flex flex-[4.8] flex-col py-4">
+          <div className="flex min-w-0 flex-[4.8] flex-col py-4">
             <h3 className="line-clamp-2 font-semibold">{barbershop.name}</h3>
             <p className="line-clamp-2 text-sm text-muted-foreground">
               {barbershop.address}
@@ -62,6 +63,9 @@ const InfoBarbershop = ({ barbershop, onSuccess }: BarbershopItemProps) => {
             </Sheet>
           </div>
         </CardContent>
+        <div className="p-2">
+          <CopyBarbershopLink barbershopId={barbershop.id} />
+        </div>
       </Card>
     </div>
   )
