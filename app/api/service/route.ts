@@ -3,15 +3,28 @@ import { db } from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, imageUrl, description, price, barbershopId } =
-      await req.json()
+    const {
+      name,
+      imageUrl,
+      description,
+      price,
+      barbershopId,
+      durationInMinutes,
+    } = await req.json()
 
-    if (!name || !description || !price || !barbershopId) {
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !barbershopId ||
+      !durationInMinutes
+    ) {
       console.error("POST /api/services: dados insuficientes", {
         name,
         description,
         price,
         barbershopId,
+        durationInMinutes,
       })
       return NextResponse.json(
         { error: "Dados insuficientes" },
@@ -25,6 +38,7 @@ export async function POST(req: NextRequest) {
         imageUrl: imageUrl || null,
         description,
         price,
+        durationInMinutes,
         barbershopId,
       },
     })

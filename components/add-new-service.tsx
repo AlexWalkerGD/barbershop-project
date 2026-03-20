@@ -2,6 +2,10 @@ import React, { useState } from "react"
 import { toast } from "sonner"
 
 import { Employee, UserInfo } from "@/lib/barbershop"
+import {
+  formatDurationLabel,
+  SERVICE_DURATION_OPTIONS,
+} from "@/lib/booking-utils"
 import { Button } from "@/components/ui/button"
 
 import ImageUploadInput from "./image-upload-input"
@@ -12,6 +16,13 @@ import {
   DialogTitle,
 } from "./ui/dialog"
 import { Input } from "./ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
 
 interface BarbershopState {
   id: string
@@ -23,6 +34,7 @@ interface BarbershopState {
     description: string
     image: string
     price: number
+    durationInMinutes: number
   }[]
   phones: string[]
   description: string
@@ -53,6 +65,7 @@ const AddNewService = ({
   const [description, setDescription] = useState("")
   const [imageUrl, setImageUrl] = useState("")
   const [price, setPrice] = useState("")
+  const [durationInMinutes, setDurationInMinutes] = useState("30")
   const [loading, setLoading] = useState(false)
   const [isImageUploading, setIsImageUploading] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
@@ -61,6 +74,7 @@ const AddNewService = ({
     if (!name) return toast.error("Nome obrigatório")
     if (!description) return toast.error("Descrição obrigatória")
     if (!price) return toast.error("Preço obrigatório")
+    if (!durationInMinutes) return toast.error("Duração obrigatória")
     if (isImageUploading) return toast.error("Aguarde o envio da imagem")
 
     setLoading(true)
@@ -74,6 +88,7 @@ const AddNewService = ({
           imageUrl: imageUrl || null,
           description,
           price,
+          durationInMinutes: Number(durationInMinutes),
           barbershopId,
         }),
       })
@@ -85,6 +100,7 @@ const AddNewService = ({
       setDescription("")
       setPrice("")
       setImageUrl("")
+      setDurationInMinutes("30")
       setShowImageUpload(false)
       onSuccess()
 
@@ -98,6 +114,7 @@ const AddNewService = ({
             description,
             image: imageUrl,
             price: Number(price),
+            durationInMinutes: Number(durationInMinutes),
           },
         ],
       }))
@@ -132,6 +149,25 @@ const AddNewService = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Duração do serviço</p>
+            <Select
+              value={durationInMinutes}
+              onValueChange={setDurationInMinutes}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Escolha a duração" />
+              </SelectTrigger>
+              <SelectContent>
+                {SERVICE_DURATION_OPTIONS.map((duration) => (
+                  <SelectItem key={duration} value={String(duration)}>
+                    {formatDurationLabel(duration)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="space-y-3">
             <Button

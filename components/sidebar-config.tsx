@@ -23,6 +23,7 @@ import { toast } from "sonner"
 import { deleteService } from "@/app/_actions/delete.service"
 import EditBarbershop from "./edit-barbershop"
 import { AvailabilityCard } from "./availability card"
+import { formatDurationLabel } from "@/lib/booking-utils"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [dataBarbershop, setDataBarbershop] = useState({
@@ -197,7 +198,16 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
                   key={ser.id}
                   className="ml-3 flex flex-row items-center justify-between border-b p-2"
                 >
-                  <p>{ser.name}</p>
+                  <div>
+                    <p>{ser.name}</p>
+                    {"durationInMinutes" in ser && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatDurationLabel(
+                          Number(ser.durationInMinutes ?? 30),
+                        )}
+                      </p>
+                    )}
+                  </div>
 
                   <div className="flex flex-row items-center gap-5">
                     <p>€ {ser.price},00</p>

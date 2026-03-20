@@ -64,6 +64,7 @@ export async function GET(
         date: b.date.toISOString(),
         userName: b.user?.name ?? "Cliente",
         serviceName: b.service?.name ?? "Serviço",
+        durationInMinutes: b.service?.durationInMinutes ?? 30,
       })),
     }))
 
@@ -71,6 +72,7 @@ export async function GET(
     const services = barbershop.services.map((s) => ({
       id: s.id,
       name: s.name,
+      durationInMinutes: s.durationInMinutes,
     }))
 
     return NextResponse.json({

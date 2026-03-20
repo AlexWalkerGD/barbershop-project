@@ -2,7 +2,13 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
-import { format, isPast } from "date-fns"
+import {
+  addMinutes,
+  format,
+  isPast,
+  isSameMinute,
+  isWithinInterval,
+} from "date-fns"
 import Header from "@/components/header"
 import { ptBR } from "date-fns/locale"
 import { Calendar } from "@/components/ui/calendar"
@@ -17,6 +23,7 @@ interface Booking {
   date: string
   userName: string
   serviceName: string
+  durationInMinutes: number
 }
 
 interface Employee {
@@ -145,6 +152,31 @@ export default function Schedules({ params }: { params: { id: string } }) {
       format(new Date(b.date), "yyyy-MM-dd") ===
       format(selectedDate, "yyyy-MM-dd"),
   )
+
+  const getSlotBookingState = (slot: Date) => {
+    for (const booking of bookingsToday) {
+      const bookingStart = new Date(booking.date)
+      const bookingEnd = addMinutes(bookingStart, booking.durationInMinutes)
+      const isStart = isSameMinute(slot, bookingStart)
+      const isContinuation =
+        !isStart &&
+        isWithinInterval(slot, {
+          start: bookingStart,
+          end: addMinutes(bookingEnd, -1),
+        })
+
+      if (isStart || isContinuation) {
+        return { booking, isStart }
+      }
+    }
+
+    return null
+  }
+
+  const visibleSlots = slots.filter((slot) => {
+    const slotBookingState = getSlotBookingState(slot)
+    return !slotBookingState || slotBookingState.isStart
+  })
 
   const handleBookingClick = () => {
     setCalendarSheetIsOpen(!calendarSheetIsOpen)
@@ -289,7 +321,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                 }
               >
                 <div className="flex flex-col">
-                  {slots.map((slot) => {
+                  {visibleSlots.map((slot) => {
                     return (
                       <div
                         key={slot.toISOString()}
@@ -301,12 +333,9 @@ export default function Schedules({ params }: { params: { id: string } }) {
                   })}
                 </div>
                 <div className="flex w-full flex-col">
-                  {slots.map((slot) => {
-                    const booking = bookingsToday.find(
-                      (b: any) =>
-                        format(new Date(b.date), "HH:mm") ===
-                        format(slot, "HH:mm"),
-                    )
+                  {visibleSlots.map((slot) => {
+                    const slotBookingState = getSlotBookingState(slot)
+                    const booking = slotBookingState?.booking
 
                     return (
                       <div

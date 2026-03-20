@@ -1,7 +1,8 @@
 "use server"
 
-import { db } from "@/lib/prisma"
 import { endOfDay, startOfDay } from "date-fns"
+
+import { db } from "@/lib/prisma"
 
 interface GetBookingsProps {
   date: Date
@@ -15,6 +16,13 @@ export const getBookings = ({ date, employeeId }: GetBookingsProps) => {
       date: {
         lte: endOfDay(date),
         gte: startOfDay(date),
+      },
+    },
+    include: {
+      service: {
+        select: {
+          durationInMinutes: true,
+        },
       },
     },
   })

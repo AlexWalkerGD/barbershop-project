@@ -6,12 +6,13 @@ import Employee from "@/components/employee"
 import PhoneItem from "@/components/phone-item"
 import ServiceItem from "@/components/service-item"
 import { Button } from "@/components/ui/button"
-import { MapPinIcon, MenuIcon, StarIcon } from "lucide-react"
+import { MapPinIcon, MenuIcon } from "lucide-react"
 import Image from "next/image"
 import SidebarSheet from "@/components/sidebar-sheet"
 import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import ThemeToggle from "@/components/theme-toggle"
 
 interface SelectableEmployee {
   id: string
@@ -103,6 +104,9 @@ const EmployeeSelector = ({
         {/* DESKTOP NAVBAR */}
         <div className="hidden lg:flex lg:items-center lg:justify-end lg:py-6">
           <Sheet>
+            <div className="pr-3">
+              <ThemeToggle />
+            </div>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline">
                 <MenuIcon />
@@ -121,6 +125,10 @@ const EmployeeSelector = ({
               fill
               className="object-cover"
             />
+
+            <div className="absolute right-16 top-4">
+              <ThemeToggle />
+            </div>
 
             <Sheet>
               <SheetTrigger asChild>
@@ -142,10 +150,10 @@ const EmployeeSelector = ({
               <MapPinIcon className="text-primary" size={18} />
               <p className="text-sm">{barbershop?.address}</p>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <StarIcon className="fill-primary text-primary" size={18} />
               <p className="text-sm">5.0 (499 avaliações)</p>
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-2 border-b border-solid p-5">
@@ -218,7 +226,7 @@ const EmployeeSelector = ({
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-solid bg-card p-4">
+                {/* <div className="rounded-lg border border-solid bg-card p-4">
                   <div className="flex items-center gap-2">
                     <StarIcon className="fill-primary text-primary" size={18} />
                     <p className="font-semibold">5.0</p>
@@ -226,7 +234,7 @@ const EmployeeSelector = ({
                   <p className="mt-1 text-xs text-muted-foreground">
                     499 avaliações
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
 

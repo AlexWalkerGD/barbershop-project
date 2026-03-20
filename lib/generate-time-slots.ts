@@ -1,6 +1,5 @@
 import { set } from "date-fns"
-
-const TIME_INCREMENT = 30
+import { SLOT_INTERVAL_MINUTES } from "./booking-utils"
 
 export function generateTimeSlots({
   day,
@@ -26,7 +25,7 @@ export function generateTimeSlots({
 
     slots.push(slot)
 
-    minute += TIME_INCREMENT
+    minute += SLOT_INTERVAL_MINUTES
     if (minute >= 60) {
       minute = 0
       hour++
