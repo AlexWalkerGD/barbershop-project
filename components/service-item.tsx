@@ -9,7 +9,7 @@ import { ImageIcon } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-
+import { isPast } from "date-fns"
 import { createBooking } from "@/app/_actions/create-booking"
 import { getBookings } from "@/app/_actions/get_bookings"
 import {
@@ -78,7 +78,8 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   )
 
   const disabledDays = useMemo(
-    () => (date: Date) => !enabledWeekDays.includes(date.getDay()),
+    () => (date: Date) =>
+      isPast(date) || !enabledWeekDays.includes(date.getDay()),
     [enabledWeekDays],
   )
 
