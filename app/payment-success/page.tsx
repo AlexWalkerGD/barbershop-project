@@ -1,19 +1,24 @@
-"use client"
+import { syncSubscriptionFromCheckoutSession } from "@/lib/stripe-subscription-sync"
+import { redirect } from "next/navigation"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+interface PaymentSuccessPageProps {
+  searchParams?: {
+    session_id?: string
+  }
+}
 
-export default function PaymentSuccess() {
-  const router = useRouter()
+export default async function PaymentSuccess({
+  searchParams,
+}: PaymentSuccessPageProps) {
+  const sessionId = searchParams?.session_id
 
-  useEffect(() => {
-    const refreshSession = async () => {
-      router.refresh()
-      router.push("/")
+  if (sessionId) {
+    try {
+      await syncSubscriptionFromCheckoutSession(sessionId)
+    } catch (error) {
+      console.error("Failed to sync subscription from success page:", error)
     }
+  }
 
-    refreshSession()
-  }, [])
-
-  return <p>Atualizando sua assinatura...</p>
+  redirect("/")
 }
