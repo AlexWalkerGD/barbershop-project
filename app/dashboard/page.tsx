@@ -1,134 +1,59 @@
-"use client"
-
-import Header from "@/components/header"
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { signIn } from "next-auth/react"
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Dialog,
-} from "@/components/ui/dialog"
-import Image from "next/image"
-import InfoBarber from "@/components/info-barbershop"
-import NewBarber from "@/components/new-barbershop"
-import { DialogContent } from "@/components/ui/dialog"
-import { DialogTrigger } from "@radix-ui/react-dialog"
+import { authOptions } from "@/lib/auth"
+import { db } from "@/lib/prisma"
+import DashboardContent from "@/components/dashboard-content"
 import { BarbershopWithRelations } from "@/lib/barbershop"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 
-const Dashboard = () => {
-  const [barbershops, setBarbershops] = useState<BarbershopWithRelations[]>([])
-  const [newBarbershop, setNewBarbershop] = useState(false)
-  const handleLoginWithGoogleClick = () => signIn("google")
-  const { data: session, status } = useSession()
+const DashboardPage = async () => {
+  const session = await getServerSession(authOptions)
 
-  const handleSuccess = async () => {
-    setNewBarbershop(false)
-    if (!session) return
-    const res = await fetch("/api/barbershops")
-    const data = await res.json()
-    setBarbershops(data)
+  if (!session?.user) {
+    redirect("/")
   }
 
-  const handleSetBarbers = async (barbershopsId: string) => {
-    setBarbershops((prev) => prev.filter((b) => b.id !== barbershopsId))
+  if (session.user.role === "USER") {
+    redirect("/signature")
   }
 
-  useEffect(() => {
-    if (!session) return
+  const barbershops = await db.barbershop.findMany({
+    where: { ownerId: session.user.id },
+    include: {
+      services: true,
+      employees: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  })
 
-    fetch("/api/barbershops")
-      .then((res) => res.json())
-      .then((data) => setBarbershops(data))
-  }, [session])
-
-  if (status === "unauthenticated") {
-    return <div>Carregando...</div>
-  }
-
-  if (!session) {
-    return (
-      <div className="h-fill flex flex-col items-center justify-center pt-80">
-        <Dialog>
-          <DialogHeader>
-            <DialogTitle>Faça login na plataforma</DialogTitle>
-            <DialogDescription>
-              Conecte-se usando sua conta do Google
-            </DialogDescription>
-          </DialogHeader>
-        </Dialog>
-
-        <Button
-          variant="outline"
-          className="mt-4 gap-1 font-bold"
-          onClick={handleLoginWithGoogleClick}
-        >
-          <Image
-            alt="Fazer login com o Google"
-            src="/google.svg"
-            width={18}
-            height={18}
-          />
-          Google
-        </Button>
-      </div>
-    )
-  }
+  const normalizedBarbershops: BarbershopWithRelations[] = barbershops.map(
+    (barbershop) => ({
+      ...barbershop,
+      services: barbershop.services.map((service) => ({
+        id: service.id,
+        name: service.name,
+        price: Number(service.price),
+      })),
+      employees: barbershop.employees.map((employee) => ({
+        id: employee.id,
+        user: {
+          id: employee.user.id,
+          name: employee.user.name,
+          image: employee.user.image,
+          email: employee.user.email,
+        },
+      })),
+    }),
+  )
 
   return (
-    <div>
-      <div>
-        <Header />
-        <div className="m-5">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-xl font-bold">Dashboard</h1>
-              <h4 className="font-semibold">Olá, Alex Walker</h4>
-            </div>
-            <Dialog
-              open={newBarbershop}
-              onOpenChange={(open) => setNewBarbershop(open)}
-            >
-              <DialogTrigger asChild>
-                <Button
-                  className="mt-3 p-[10px] pb-5 text-4xl font-extralight"
-                  onClick={() => setNewBarbershop(true)}
-                >
-                  +
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className="w-[90%]"
-                onOpenAutoFocus={(event) => event.preventDefault()}
-              >
-                <NewBarber
-                  dialogTitle="Nova barbearia"
-                  dialogDescription="Descreva sua nova barbearia"
-                  onSuccess={handleSuccess}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
-            Minhas barbearias
-          </h2>
-
-          <div className="flex flex-col gap-5 pt-5">
-            {barbershops.length === 0 && <p>Você não tem barbearias.</p>}
-            {barbershops.map((b) => (
-              <InfoBarber
-                key={b.id}
-                barbershop={b}
-                onSuccess={() => handleSetBarbers(b.id)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <DashboardContent
+      initialBarbershops={normalizedBarbershops}
+      userName={session.user.name}
+    />
   )
 }
 
-export default Dashboard
+export default DashboardPage

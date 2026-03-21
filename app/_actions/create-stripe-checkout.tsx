@@ -20,7 +20,7 @@ export const createStripeCheckout = actionClient.action(async () => {
     payment_method_types: ["card"],
     mode: "subscription",
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/signature`,
     client_reference_id: session.user.id,
     metadata: {
       userId: session.user.id,

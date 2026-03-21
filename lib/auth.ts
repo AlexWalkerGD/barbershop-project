@@ -2,6 +2,7 @@ import { AuthOptions } from "next-auth"
 import { db } from "@/lib/prisma"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import GoogleProvider from "next-auth/providers/google"
+import { getEffectiveUserRole } from "@/lib/subscription-access"
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(db),
@@ -23,10 +24,28 @@ export const authOptions: AuthOptions = {
         where: {
           id: token.id as string,
         },
+        include: {
+          subscription: true,
+        },
       })
 
       if (dbUser) {
-        token.role = dbUser.role
+        const effectiveRole = getEffectiveUserRole(
+          dbUser.role,
+          dbUser.subscription,
+        )
+
+        if (
+          effectiveRole !== dbUser.role &&
+          (dbUser.role === "ADMIN" || dbUser.role === "USER")
+        ) {
+          await db.user.update({
+            where: { id: dbUser.id },
+            data: { role: effectiveRole },
+          })
+        }
+
+        token.role = effectiveRole
       }
 
       return token
