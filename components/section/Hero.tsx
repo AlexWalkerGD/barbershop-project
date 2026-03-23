@@ -81,7 +81,7 @@ const Hero = () => {
               <div className="h-3 w-3 rounded-full bg-yellow-500/70" />
               <div className="h-3 w-3 rounded-full bg-green-500/70" />
               <div className="bg-surface-3 mx-4 flex-1 rounded-md px-3 py-1 text-xs text-muted-foreground">
-                tempus.app/
+                tempus.today/
               </div>
             </div>
             <Image

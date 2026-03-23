@@ -21,6 +21,14 @@ export const createBarbershop = async (params: CreateBookingParams) => {
     }
 
     const ownerId = session.user.id
+    const existingBarbershop = await db.barbershop.findFirst({
+      where: { ownerId },
+      select: { id: true },
+    })
+
+    if (existingBarbershop) {
+      throw new Error("Usuário já possui uma barbearia cadastrada")
+    }
 
     const newBarbershop = await db.barbershop.create({
       data: { ...params, ownerId },
@@ -40,6 +48,10 @@ export const createBarbershop = async (params: CreateBookingParams) => {
     return newBarbershop
   } catch (err) {
     console.error("Erro ao criar barbearia:", err)
+    if (err instanceof Error) {
+      throw err
+    }
+
     throw new Error("Erro ao criar barbearia")
   }
 }

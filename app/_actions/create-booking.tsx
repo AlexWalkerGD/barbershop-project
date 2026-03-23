@@ -2,12 +2,17 @@
 
 import { randomUUID } from "crypto"
 
-import { addMinutes, endOfDay, startOfDay } from "date-fns"
+import { addMinutes } from "date-fns"
 import { getServerSession } from "next-auth"
 
 import { authOptions } from "@/lib/auth"
 import { hasBookingOverlap } from "@/lib/booking-utils"
 import { db } from "@/lib/prisma"
+import {
+  getBusinessDayBounds,
+  getWeekdayInBusinessTimeZone,
+  setBusinessTimeOnDate,
+} from "@/lib/timezone-utils"
 
 interface User {
   id?: string
@@ -73,9 +78,7 @@ export const createBooking = async ({
       throw new Error("Serviço não encontrado")
     }
 
-    const weekday = date
-      .toLocaleDateString("en-US", { weekday: "long" })
-      .toLowerCase()
+    const weekday = getWeekdayInBusinessTimeZone(date)
 
     const availability = await db.availability.findUnique({
       where: {
@@ -90,16 +93,8 @@ export const createBooking = async ({
       throw new Error("Funcionário indisponível neste dia")
     }
 
-    const [startHour, startMinute] = availability.startHour
-      .split(":")
-      .map(Number)
-    const [endHour, endMinute] = availability.endHour.split(":").map(Number)
-
-    const workStart = new Date(date)
-    workStart.setHours(startHour, startMinute, 0, 0)
-
-    const workEnd = new Date(date)
-    workEnd.setHours(endHour, endMinute, 0, 0)
+    const workStart = setBusinessTimeOnDate(date, availability.startHour)
+    const workEnd = setBusinessTimeOnDate(date, availability.endHour)
 
     const bookingEnd = addMinutes(date, service.durationInMinutes)
 
@@ -107,12 +102,14 @@ export const createBooking = async ({
       throw new Error("Horário fora da disponibilidade do funcionário")
     }
 
+    const { start, end } = getBusinessDayBounds(date)
+
     const bookings = await db.booking.findMany({
       where: {
         employeeId,
         date: {
-          gte: startOfDay(date),
-          lte: endOfDay(date),
+          gte: start,
+          lte: end,
         },
       },
       include: {

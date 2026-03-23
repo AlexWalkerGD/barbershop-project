@@ -22,6 +22,7 @@ const DashboardContent = ({
   const [barbershops, setBarbershops] =
     useState<BarbershopWithRelations[]>(initialBarbershops)
   const [newBarbershop, setNewBarbershop] = useState(false)
+  const canCreateBarbershop = barbershops.length === 0
 
   const handleSuccess = async () => {
     setNewBarbershop(false)
@@ -44,29 +45,31 @@ const DashboardContent = ({
               <h1 className="text-xl font-bold">Dashboard</h1>
               <h4 className="font-semibold">Ola, {userName ?? "usuario"}</h4>
             </div>
-            <Dialog
-              open={newBarbershop}
-              onOpenChange={(open) => setNewBarbershop(open)}
-            >
-              <DialogTrigger asChild>
-                <Button
-                  className="mt-3 p-[10px] pb-5 text-4xl font-extralight"
-                  onClick={() => setNewBarbershop(true)}
-                >
-                  +
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className="w-[90%]"
-                onOpenAutoFocus={(event) => event.preventDefault()}
+            {canCreateBarbershop && (
+              <Dialog
+                open={newBarbershop}
+                onOpenChange={(open) => setNewBarbershop(open)}
               >
-                <NewBarber
-                  dialogTitle="Nova barbearia"
-                  dialogDescription="Descreva sua nova barbearia"
-                  onSuccess={handleSuccess}
-                />
-              </DialogContent>
-            </Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    className="mt-3 p-[10px] pb-5 text-4xl font-extralight"
+                    onClick={() => setNewBarbershop(true)}
+                  >
+                    +
+                  </Button>
+                </DialogTrigger>
+                <DialogContent
+                  className="w-[90%]"
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                >
+                  <NewBarber
+                    dialogTitle="Nova barbearia"
+                    dialogDescription="Descreva sua nova barbearia"
+                    onSuccess={handleSuccess}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
           <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
             Minhas barbearias

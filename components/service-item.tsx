@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react"
 import { Barbershop, BarbershopService, User } from "@prisma/client"
 import { ptBR } from "date-fns/locale"
 import Image from "next/image"
-import { ImageIcon } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -185,22 +184,18 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
     <>
       <Card>
         <CardContent className="flex items-center gap-3 p-3">
-          <div className="relative max-h-[110px] min-h-[110px] min-w-[110px] max-w-[110px]">
-            {service.imageUrl ? (
+          {service.imageUrl && (
+            <div className="relative max-h-[110px] min-h-[110px] min-w-[110px] max-w-[110px]">
               <Image
                 alt={service.name}
                 src={service.imageUrl}
                 fill
                 className="rounded-lg object-cover"
               />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-lg bg-secondary text-muted-foreground">
-                <ImageIcon className="h-6 w-6" />
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div className="space-y-2">
+          <div className="flex-1 space-y-2">
             <h3 className="font-semibold">{service.name}</h3>
             <p className="text-sm text-muted-foreground">
               {service.description}

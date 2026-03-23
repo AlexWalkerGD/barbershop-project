@@ -1,8 +1,7 @@
 "use server"
 
-import { endOfDay, startOfDay } from "date-fns"
-
 import { db } from "@/lib/prisma"
+import { getBusinessDayBounds } from "@/lib/timezone-utils"
 
 interface GetBookingsProps {
   date: Date
@@ -10,12 +9,14 @@ interface GetBookingsProps {
 }
 
 export const getBookings = ({ date, employeeId }: GetBookingsProps) => {
+  const { start, end } = getBusinessDayBounds(date)
+
   return db.booking.findMany({
     where: {
       employeeId,
       date: {
-        lte: endOfDay(date),
-        gte: startOfDay(date),
+        lte: end,
+        gte: start,
       },
     },
     include: {

@@ -9,7 +9,7 @@ const benefits = [
   {
     title: "Cada barbeiro com sua disponibilidade",
     description:
-      "Configure horários individuais. O João trabalha manhã, o Pedro à tarde — sem conflito algum.",
+      "Agenda individual, clientes podem escolher seu barbeiro sem ter confusões.",
   },
   {
     title: "Zero conflitos de horário",
@@ -27,9 +27,9 @@ const benefits = [
       "Feita para quem não é expert em tecnologia. Qualquer barbeiro aprende em minutos.",
   },
   {
-    title: "Receita recorrente com assinaturas",
+    title: "Mantenha o controle manual",
     description:
-      "Crie planos de fidelidade. Clientes pagam mensalmente e garantem seus horários fixos.",
+      "Crie agendamentos por conta própria e nunca fique com horários livres.",
   },
 ]
 
@@ -56,12 +56,12 @@ const BenefitsSection = () => {
             </p>
 
             <a
-              href="https://barbershop-project-roan.vercel.app/"
+              href="/signature"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-gold glow-gold-sm inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:opacity-90"
             >
-              Começar gratuitamente
+              Começar agora
             </a>
           </div>
 

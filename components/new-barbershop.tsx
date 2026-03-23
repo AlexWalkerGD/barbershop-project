@@ -77,7 +77,9 @@ const NewBarbershop = ({
       onSuccess()
     } catch (error) {
       console.error(error)
-      toast.error("Erro ao criar barbearia")
+      const message =
+        error instanceof Error ? error.message : "Erro ao criar barbearia"
+      toast.error(message)
     }
   }
 

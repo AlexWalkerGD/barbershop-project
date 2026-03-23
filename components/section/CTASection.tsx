@@ -26,7 +26,7 @@ const CTASection = () => {
 
             <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-muted-foreground">
               Junte-se a barbearias que já transformaram sua gestão com o
-              Tempus. Comece hoje, sem cartão de crédito necessário.
+              Tempus.
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -58,7 +58,7 @@ const CTASection = () => {
               <span className="font-syne text-lg font-bold">Tempus</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              © 2025 Tempus. Todos os direitos reservados.
+              © 2026 Tempus. Todos os direitos reservados.
             </p>
             <a
               href="/signature"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/prisma"
-import { startOfDay, endOfDay } from "date-fns"
+import { getBusinessDayBounds } from "@/lib/timezone-utils"
 
 export async function GET(
   req: NextRequest,
@@ -21,6 +21,7 @@ export async function GET(
     const selectedDate = selectedDateStr
       ? new Date(selectedDateStr)
       : new Date()
+    const { start, end } = getBusinessDayBounds(selectedDate)
 
     const barbershop = await db.barbershop.findUnique({
       where: { id },
@@ -32,8 +33,8 @@ export async function GET(
             bookings: {
               where: {
                 date: {
-                  gte: startOfDay(selectedDate),
-                  lte: endOfDay(selectedDate),
+                  gte: start,
+                  lte: end,
                 },
               },
               include: {

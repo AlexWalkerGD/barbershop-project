@@ -20,25 +20,24 @@ const features = [
     icon: Users,
     title: "Controle por barbeiro",
     description:
-      "Cada profissional tem sua própria agenda, disponibilidade e serviços.",
+      "Cada profissional tem sua própria agenda e controle dos seus clientes.",
   },
   {
     icon: Clock,
     title: "Disponibilidade personalizada",
     description:
-      "Configure horários de trabalho, intervalos e folgas por barbeiro de forma fácil.",
+      "Configure horários de trabalho, intervalos e folgas de forma fácil.",
   },
   {
     icon: CreditCard,
-    title: "Assinaturas integradas",
+    title: "Serviços Personalizados",
     description:
-      "Sistema de planos e assinaturas para clientes fiéis. Receita recorrente e previsível.",
+      "Crie serviços ao seu estilo, personalize com imagens e horários específicos ",
   },
   {
     icon: Bell,
     title: "Lembretes automáticos",
-    description:
-      "Clientes recebem confirmação e lembrete automaticamente. Menos faltas, mais dinheiro.",
+    description: "Clientes recebem confirmação. Menos faltas, mais dinheiro.",
   },
   {
     icon: BarChart3,
