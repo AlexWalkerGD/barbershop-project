@@ -61,7 +61,7 @@ const Signature = () => {
           <div className="mt-8 flex items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">
               <div className="flex flex-row items-end gap-1">
-                <h2 className="text-2xl font-bold">€30</h2>
+                <h2 className="text-2xl font-bold">€15,90</h2>
                 <h2 className="text-sm font-bold text-muted-foreground">
                   /mês
                 </h2>
