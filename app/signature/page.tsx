@@ -28,7 +28,7 @@ const Signature = () => {
         <Card className="w-full max-w-xl rounded-2xl border p-8 shadow-lg backdrop-blur">
           <div className="flex flex-col gap-3">
             <span className="w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-              Premium Plan
+              Premium
             </span>
             <h1 className="text-xl font-bold">
               Acesso completo aos serviços de agendamento
