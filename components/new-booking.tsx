@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { ptBR } from "date-fns/locale"
 import { Barbershop } from "@prisma/client"
 import { toast } from "sonner"
-import { isPast } from "date-fns"
+import { isBefore, startOfDay, startOfToday } from "date-fns"
 
 import { createBooking } from "@/app/_actions/create-booking"
 import { getBookings } from "@/app/_actions/get_bookings"
@@ -86,7 +86,8 @@ const NewBooking = ({
 
   const disabledDays = useMemo(
     () => (date: Date) =>
-      isPast(date) || !enabledWeekDays.includes(date.getDay()),
+      isBefore(startOfDay(date), startOfToday()) ||
+      !enabledWeekDays.includes(date.getDay()),
     [enabledWeekDays],
   )
 

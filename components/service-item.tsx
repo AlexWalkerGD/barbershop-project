@@ -8,7 +8,7 @@ import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { isPast } from "date-fns"
+import { isBefore, startOfDay, startOfToday } from "date-fns"
 import { createBooking } from "@/app/_actions/create-booking"
 import { getBookings } from "@/app/_actions/get_bookings"
 import {
@@ -78,7 +78,8 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
 
   const disabledDays = useMemo(
     () => (date: Date) =>
-      isPast(date) || !enabledWeekDays.includes(date.getDay()),
+      isBefore(startOfDay(date), startOfToday()) ||
+      !enabledWeekDays.includes(date.getDay()),
     [enabledWeekDays],
   )
 

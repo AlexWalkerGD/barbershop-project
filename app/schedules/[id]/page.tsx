@@ -5,9 +5,11 @@ import React, { useEffect, useMemo, useState } from "react"
 import {
   addMinutes,
   format,
-  isPast,
+  isBefore,
   isSameMinute,
+  startOfDay,
   isWithinInterval,
+  startOfToday,
 } from "date-fns"
 import Header from "@/components/header"
 import { ptBR } from "date-fns/locale"
@@ -17,6 +19,7 @@ import { DialogContent, Dialog } from "@/components/ui/dialog"
 import { DialogTrigger } from "@radix-ui/react-dialog"
 import NewBooking from "@/components/new-booking"
 import { generateTimeSlots } from "@/lib/generate-time-slots"
+import BookingInfo from "@/components/bookingInfo"
 
 interface Booking {
   id: string
@@ -75,7 +78,8 @@ export default function Schedules({ params }: { params: { id: string } }) {
 
   const disabledDays = useMemo(
     () => (date: Date) =>
-      isPast(date) || !enabledWeekDays.includes(date.getDay()),
+      isBefore(startOfDay(date), startOfToday()) ||
+      !enabledWeekDays.includes(date.getDay()),
     [enabledWeekDays],
   )
 
@@ -350,14 +354,7 @@ export default function Schedules({ params }: { params: { id: string } }) {
                           }`}
                         >
                           {booking ? (
-                            <>
-                              <div className="text-[14px]">
-                                {booking.userName}
-                              </div>
-                              <div className="text-[12px] text-primary-foreground">
-                                {booking.serviceName}
-                              </div>
-                            </>
+                            <BookingInfo booking={booking} />
                           ) : (
                             <div className="text-[12px] text-primary-foreground"></div>
                           )}

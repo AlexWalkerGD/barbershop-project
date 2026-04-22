@@ -43,7 +43,7 @@ const DashboardContent = ({
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
               <h1 className="text-xl font-bold">Dashboard</h1>
-              <h4 className="font-semibold">Ola, {userName ?? "usuario"}</h4>
+              <h4 className="font-semibold">Olá, {userName ?? "usuario"}</h4>
             </div>
             {canCreateBarbershop && (
               <Dialog
