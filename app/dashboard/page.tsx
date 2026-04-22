@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 
 import { getDashboardStats } from "../_data/get-dashboard-stats"
+import { getNewClients } from "../_data/get-new-clients"
 
 const DashboardPage = async () => {
   const session = await getServerSession(authOptions)
@@ -18,8 +19,9 @@ const DashboardPage = async () => {
     redirect("/signature")
   }
 
-  const [dashboardStats, barbershops] = await Promise.all([
+  const [dashboardStats, newClients, barbershops] = await Promise.all([
     getDashboardStats(session.user.id),
+    getNewClients(session.user.id),
     db.barbershop.findMany({
       where: { ownerId: session.user.id },
       include: {
@@ -58,6 +60,7 @@ const DashboardPage = async () => {
       initialBarbershops={normalizedBarbershops}
       userName={session.user.name}
       dashboardStats={dashboardStats}
+      newClients={newClients}
     />
   )
 }

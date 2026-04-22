@@ -7,19 +7,24 @@ import type {
   DashboardMetric,
   DashboardStats,
 } from "@/app/_data/get-dashboard-stats"
+import type { NewClient } from "@/app/_data/get-new-clients"
 import Header from "@/components/header"
 import InfoBarber from "@/components/info-barbershop"
 import NewBarber from "@/components/new-barbershop"
+
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { BarbershopWithRelations } from "@/lib/barbershop"
 
 import Datas from "./datas"
+import NewClientsCard from "./newClientsCard"
+/* import MonthlyGoal from "./monthlyGoal" */
 
 interface DashboardContentProps {
   initialBarbershops: BarbershopWithRelations[]
   userName?: string | null
   dashboardStats: DashboardStats
+  newClients: NewClient[]
 }
 
 const formatGrowth = (value: number) =>
@@ -60,6 +65,7 @@ const DashboardContent = ({
   initialBarbershops,
   userName,
   dashboardStats,
+  newClients,
 }: DashboardContentProps) => {
   const [barbershops, setBarbershops] =
     useState<BarbershopWithRelations[]>(initialBarbershops)
@@ -155,6 +161,26 @@ const DashboardContent = ({
               ),
             )}
           </div>
+
+          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
+            Novos Clients
+          </h2>
+
+          <div className="mt-8">
+            <NewClientsCard clients={newClients} />
+          </div>
+
+          {/* <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
+            Meta Mensal
+          </h2>
+
+          <div className="mt-8">
+            <MonthlyGoal
+              type="revenue"
+              currentValue={dashboardStats.monthRevenue.value}
+              targetValue={5000}
+            />
+          </div> */}
         </div>
       </div>
     </div>

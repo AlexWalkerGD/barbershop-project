@@ -43,9 +43,9 @@ const buildBookingWhere = (
 })
 
 const calculateGrowth = (current: number, previous: number) => {
-  if (previous <= 0) {
+  if (previous === 0) {
     return {
-      growth: 0,
+      growth: current > 0 ? 100 : 0,
       trend: "up" as const,
     }
   }
