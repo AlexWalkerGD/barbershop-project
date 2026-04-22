@@ -1,9 +1,11 @@
-import { authOptions } from "@/lib/auth"
-import { db } from "@/lib/prisma"
 import DashboardContent from "@/components/dashboard-content"
+import { authOptions } from "@/lib/auth"
 import { BarbershopWithRelations } from "@/lib/barbershop"
+import { db } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
+
+import { getDashboardStats } from "../_data/get-dashboard-stats"
 
 const DashboardPage = async () => {
   const session = await getServerSession(authOptions)
@@ -16,17 +18,20 @@ const DashboardPage = async () => {
     redirect("/signature")
   }
 
-  const barbershops = await db.barbershop.findMany({
-    where: { ownerId: session.user.id },
-    include: {
-      services: true,
-      employees: {
-        include: {
-          user: true,
+  const [dashboardStats, barbershops] = await Promise.all([
+    getDashboardStats(session.user.id),
+    db.barbershop.findMany({
+      where: { ownerId: session.user.id },
+      include: {
+        services: true,
+        employees: {
+          include: {
+            user: true,
+          },
         },
       },
-    },
-  })
+    }),
+  ])
 
   const normalizedBarbershops: BarbershopWithRelations[] = barbershops.map(
     (barbershop) => ({
@@ -52,6 +57,7 @@ const DashboardPage = async () => {
     <DashboardContent
       initialBarbershops={normalizedBarbershops}
       userName={session.user.name}
+      dashboardStats={dashboardStats}
     />
   )
 }

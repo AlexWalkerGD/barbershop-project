@@ -1,23 +1,65 @@
 "use client"
 
-import Header from "@/components/header"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog } from "@/components/ui/dialog"
+import { DialogTrigger } from "@radix-ui/react-dialog"
+
+import type {
+  DashboardMetric,
+  DashboardStats,
+} from "@/app/_data/get-dashboard-stats"
+import Header from "@/components/header"
 import InfoBarber from "@/components/info-barbershop"
 import NewBarber from "@/components/new-barbershop"
-import { DialogContent } from "@/components/ui/dialog"
-import { DialogTrigger } from "@radix-ui/react-dialog"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { BarbershopWithRelations } from "@/lib/barbershop"
+
+import Datas from "./datas"
 
 interface DashboardContentProps {
   initialBarbershops: BarbershopWithRelations[]
   userName?: string | null
+  dashboardStats: DashboardStats
 }
+
+const formatGrowth = (value: number) =>
+  `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value)
+
+const createCardData = (stats: DashboardStats) => [
+  {
+    title: "Hoje",
+    metric: stats.todayBookings,
+    value: String(stats.todayBookings.value),
+  },
+  {
+    title: "Semana",
+    metric: stats.weekBookings,
+    value: String(stats.weekBookings.value),
+  },
+  {
+    title: "Mês",
+    metric: stats.monthBookings,
+    value: String(stats.monthBookings.value),
+  },
+  {
+    title: "Faturamento",
+    metric: stats.monthRevenue,
+    value: formatCurrency(stats.monthRevenue.value),
+  },
+]
 
 const DashboardContent = ({
   initialBarbershops,
   userName,
+  dashboardStats,
 }: DashboardContentProps) => {
   const [barbershops, setBarbershops] =
     useState<BarbershopWithRelations[]>(initialBarbershops)
@@ -34,6 +76,8 @@ const DashboardContent = ({
   const handleSetBarbers = async (barbershopsId: string) => {
     setBarbershops((prev) => prev.filter((b) => b.id !== barbershopsId))
   }
+
+  const cards = createCardData(dashboardStats)
 
   return (
     <div>
@@ -76,7 +120,7 @@ const DashboardContent = ({
           </h2>
 
           <div className="flex flex-col gap-5 pt-5">
-            {barbershops.length === 0 && <p>Voce nao tem barbearias.</p>}
+            {barbershops.length === 0 && <p>Você não tem barbearias.</p>}
             {barbershops.map((b) => (
               <InfoBarber
                 key={b.id}
@@ -84,6 +128,32 @@ const DashboardContent = ({
                 onSuccess={() => handleSetBarbers(b.id)}
               />
             ))}
+          </div>
+
+          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
+            Indicadores da barbearia
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {cards.map(
+              ({
+                title,
+                metric,
+                value,
+              }: {
+                title: string
+                metric: DashboardMetric
+                value: string
+              }) => (
+                <Datas
+                  key={title}
+                  title={title}
+                  value={value}
+                  growth={formatGrowth(metric.growth)}
+                  trend={metric.trend}
+                  description={metric.description}
+                />
+              ),
+            )}
           </div>
         </div>
       </div>
