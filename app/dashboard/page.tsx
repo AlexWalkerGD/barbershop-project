@@ -38,6 +38,8 @@ const DashboardPage = async () => {
   const normalizedBarbershops: BarbershopWithRelations[] = barbershops.map(
     (barbershop) => ({
       ...barbershop,
+      monthlyGoalType: barbershop.monthlyGoalType,
+      monthlyGoalValue: barbershop.monthlyGoalValue,
       services: barbershop.services.map((service) => ({
         id: service.id,
         name: service.name,

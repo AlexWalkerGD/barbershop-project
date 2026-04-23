@@ -1,19 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 
+import { updateMonthlyGoal } from "@/app/_actions/update-monthly-goal"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-import { Card, CardContent } from "./ui/card"
 import EditGoal from "./editGoal"
+import { Card, CardContent } from "./ui/card"
 
-type GoalType = "revenue" | "clients"
+export type GoalType = "revenue" | "clients"
 
 interface MonthlyGoalProps {
-  type?: GoalType
-  currentValue: number
-  targetValue: number
+  barbershopId?: string
+  initialGoalType?: GoalType
+  initialTargetValue: number
+  currentRevenueValue: number
+  currentClientsValue: number
 }
 
 const formatCurrency = (value: number) =>
@@ -33,24 +37,59 @@ const formatValue = (type: GoalType, value: number) => {
 }
 
 const MonthlyGoal = ({
-  type = "revenue",
-  currentValue,
-  targetValue,
+  barbershopId,
+  initialGoalType = "revenue",
+  initialTargetValue,
+  currentRevenueValue,
+  currentClientsValue,
 }: MonthlyGoalProps) => {
   const [isEditGoalOpen, setIsEditGoalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [goalConfig, setGoalConfig] = useState({
-    type,
-    targetValue,
+    type: initialGoalType,
+    targetValue: initialTargetValue,
   })
+
+  const currentValue = useMemo(
+    () =>
+      goalConfig.type === "revenue" ? currentRevenueValue : currentClientsValue,
+    [currentClientsValue, currentRevenueValue, goalConfig.type],
+  )
 
   const progress =
     goalConfig.targetValue > 0
       ? Math.min((currentValue / goalConfig.targetValue) * 100, 100)
       : 0
 
-  const handleSaveGoal = (goal: { type: GoalType; targetValue: number }) => {
-    setGoalConfig(goal)
-    setIsEditGoalOpen(false)
+  const handleSaveGoal = async (goal: {
+    type: GoalType
+    targetValue: number
+  }) => {
+    if (!barbershopId) {
+      toast.error("Cadastre uma barbearia antes de configurar a meta")
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      const updatedGoal = await updateMonthlyGoal({
+        barbershopId,
+        goalType: goal.type,
+        goalValue: goal.targetValue,
+      })
+
+      setGoalConfig({
+        type: updatedGoal.monthlyGoalType === "CLIENTS" ? "clients" : "revenue",
+        targetValue: updatedGoal.monthlyGoalValue ?? goal.targetValue,
+      })
+      setIsEditGoalOpen(false)
+      toast.success("Meta mensal atualizada com sucesso")
+    } catch (error) {
+      console.error(error)
+      toast.error("Não foi possível atualizar a meta mensal")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -66,6 +105,7 @@ const MonthlyGoal = ({
               variant="secondary"
               size="sm"
               className="rounded-md text-xs"
+              disabled={!barbershopId}
               onClick={() => setIsEditGoalOpen(true)}
             >
               Editar meta
@@ -101,6 +141,7 @@ const MonthlyGoal = ({
           <EditGoal
             initialType={goalConfig.type}
             initialTargetValue={goalConfig.targetValue}
+            isSaving={isSaving}
             onCancel={() => setIsEditGoalOpen(false)}
             onSave={handleSaveGoal}
           />

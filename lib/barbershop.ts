@@ -22,6 +22,8 @@ export interface BarbershopWithRelations extends BarbershopBase {
   phones: string[]
   description: string
   imageUrl: string
+  monthlyGoalType?: "REVENUE" | "CLIENTS" | null
+  monthlyGoalValue?: number | null
   createdAt: Date
   updatedAt: Date
   ownerId: string | null

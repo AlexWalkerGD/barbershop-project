@@ -17,12 +17,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-
-type GoalType = "revenue" | "clients"
+import type { GoalType } from "./monthlyGoal"
 
 interface EditGoalProps {
   initialType: GoalType
   initialTargetValue: number
+  isSaving?: boolean
   onCancel: () => void
   onSave: (goal: { type: GoalType; targetValue: number }) => void
 }
@@ -30,6 +30,7 @@ interface EditGoalProps {
 const EditGoal = ({
   initialType,
   initialTargetValue,
+  isSaving = false,
   onCancel,
   onSave,
 }: EditGoalProps) => {
@@ -102,8 +103,8 @@ const EditGoal = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="button" onClick={handleSave}>
-          Salvar meta
+        <Button type="button" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? "Salvando..." : "Salvar meta"}
         </Button>
       </DialogFooter>
     </div>

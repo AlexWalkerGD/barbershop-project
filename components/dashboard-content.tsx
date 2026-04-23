@@ -18,7 +18,7 @@ import { BarbershopWithRelations } from "@/lib/barbershop"
 
 import Datas from "./datas"
 import NewClientsCard from "./newClientsCard"
-/* import MonthlyGoal from "./monthlyGoal" */
+import MonthlyGoal from "./monthlyGoal"
 
 interface DashboardContentProps {
   initialBarbershops: BarbershopWithRelations[]
@@ -84,6 +84,10 @@ const DashboardContent = ({
   }
 
   const cards = createCardData(dashboardStats)
+  const primaryBarbershop = barbershops[0]
+  const monthlyGoalType =
+    primaryBarbershop?.monthlyGoalType === "CLIENTS" ? "clients" : "revenue"
+  const monthlyGoalTargetValue = primaryBarbershop?.monthlyGoalValue ?? 5000
 
   return (
     <div>
@@ -170,17 +174,19 @@ const DashboardContent = ({
             <NewClientsCard clients={newClients} />
           </div>
 
-          {/* <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
+          <h2 className="mb-3 mt-10 text-xs font-bold uppercase text-muted-foreground">
             Meta Mensal
           </h2>
 
           <div className="mt-8">
             <MonthlyGoal
-              type="revenue"
-              currentValue={dashboardStats.monthRevenue.value}
-              targetValue={5000}
+              barbershopId={primaryBarbershop?.id}
+              initialGoalType={monthlyGoalType}
+              initialTargetValue={monthlyGoalTargetValue}
+              currentRevenueValue={dashboardStats.monthRevenue.value}
+              currentClientsValue={dashboardStats.monthBookings.value}
             />
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
