@@ -103,7 +103,7 @@ const SolutionSection = () => {
               <div className="text-xs text-muted-foreground">
                 Faturamento do mês
               </div>
-              <div className="text-gold text-lg font-bold">R$ 8.420</div>
+              <div className="text-gold text-lg font-bold">€ 1.420</div>
             </div>
 
             <div className="glow-gold overflow-hidden rounded-2xl border border-border">

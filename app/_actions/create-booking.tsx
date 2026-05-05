@@ -9,6 +9,7 @@ import { authOptions } from "@/lib/auth"
 import { hasBookingOverlap } from "@/lib/booking-utils"
 import { db } from "@/lib/prisma"
 import {
+  getBusinessDateKey,
   getBusinessDayBounds,
   getWeekdayInBusinessTimeZone,
   setBusinessTimeOnDate,
@@ -79,6 +80,14 @@ export const createBooking = async ({
     }
 
     const weekday = getWeekdayInBusinessTimeZone(date)
+    const businessDateKey = getBusinessDateKey(date)
+
+    const dayOffs = await db.employeeDayOff.findMany({
+      where: {
+        employeeId,
+        date: businessDateKey,
+      },
+    })
 
     const availability = await db.availability.findUnique({
       where: {
@@ -97,6 +106,20 @@ export const createBooking = async ({
     const workEnd = setBusinessTimeOnDate(date, availability.endHour)
 
     const bookingEnd = addMinutes(date, service.durationInMinutes)
+
+    const hasDayOff = dayOffs.some((dayOff) => {
+      if (dayOff.allDay) return true
+      if (!dayOff.startHour || !dayOff.endHour) return false
+
+      const blockStart = setBusinessTimeOnDate(date, dayOff.startHour)
+      const blockEnd = setBusinessTimeOnDate(date, dayOff.endHour)
+
+      return date < blockEnd && blockStart < bookingEnd
+    })
+
+    if (hasDayOff) {
+      throw new Error("Funcionário indisponível neste horário")
+    }
 
     if (date < workStart || bookingEnd > workEnd) {
       throw new Error("Horário fora da disponibilidade do funcionário")

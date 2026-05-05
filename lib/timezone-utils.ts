@@ -94,6 +94,29 @@ export function getBusinessDayBounds(date: Date) {
   }
 }
 
+export function getBusinessDayBoundsFromDateKey(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number)
+
+  return {
+    start: zonedDateTimeToUtc({ year, month, day, hour: 0, minute: 0 }),
+    end: zonedDateTimeToUtc({
+      year,
+      month,
+      day,
+      hour: 23,
+      minute: 59,
+      second: 59,
+      millisecond: 999,
+    }),
+  }
+}
+
+export function getBusinessDateKey(date: Date) {
+  const { year, month, day } = getZonedDateParts(date)
+
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+}
+
 export function setBusinessTimeOnDate(date: Date, time: string) {
   const { year, month, day } = getZonedDateParts(date)
   const [hour, minute] = time.split(":").map(Number)

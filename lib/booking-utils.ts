@@ -13,6 +13,13 @@ export interface BookingWithDuration {
   }
 }
 
+export interface DayOffBlock {
+  date: string
+  allDay?: boolean
+  startHour?: string | null
+  endHour?: string | null
+}
+
 export function buildDateFromTime(day: Date, time: string) {
   const [hours, minutes] = time.split(":").map(Number)
 
@@ -65,12 +72,54 @@ export function hasBookingOverlap({
   })
 }
 
+export function hasDayOffOverlap({
+  day,
+  start,
+  durationInMinutes,
+  dayOffs,
+}: {
+  day: Date
+  start: Date
+  durationInMinutes: number
+  dayOffs: DayOffBlock[]
+}) {
+  const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(day.getDate()).padStart(2, "0")}`
+  const end = bookingEnd(start, durationInMinutes)
+
+  return dayOffs.some((dayOff) => {
+    if (dayOff.date !== dateKey) return false
+    if (dayOff.allDay !== false) return true
+    if (!dayOff.startHour || !dayOff.endHour) return false
+
+    const [startHour, startMinute] = dayOff.startHour.split(":").map(Number)
+    const [endHour, endMinute] = dayOff.endHour.split(":").map(Number)
+    const blockStart = set(day, {
+      hours: startHour,
+      minutes: startMinute,
+      seconds: 0,
+      milliseconds: 0,
+    })
+    const blockEnd = set(day, {
+      hours: endHour,
+      minutes: endMinute,
+      seconds: 0,
+      milliseconds: 0,
+    })
+
+    return isBefore(start, blockEnd) && isBefore(blockStart, end)
+  })
+}
+
 export function generateAvailableTimeStrings({
   day,
   startHour,
   endHour,
   durationInMinutes,
   bookings,
+  dayOffs = [],
   includePast = false,
 }: {
   day: Date
@@ -78,6 +127,7 @@ export function generateAvailableTimeStrings({
   endHour: string
   durationInMinutes: number
   bookings: BookingWithDuration[]
+  dayOffs?: DayOffBlock[]
   includePast?: boolean
 }) {
   const slots: string[] = []
@@ -110,8 +160,14 @@ export function generateAvailableTimeStrings({
       durationInMinutes,
       bookings,
     })
+    const overlapsDayOff = hasDayOffOverlap({
+      day,
+      start,
+      durationInMinutes,
+      dayOffs,
+    })
 
-    if (!isPastSlot && fitsInSchedule && !overlaps) {
+    if (!isPastSlot && fitsInSchedule && !overlaps && !overlapsDayOff) {
       slots.push(
         `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
       )

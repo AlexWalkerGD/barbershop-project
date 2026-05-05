@@ -1,14 +1,20 @@
 import { set } from "date-fns"
-import { SLOT_INTERVAL_MINUTES } from "./booking-utils"
+import {
+  DayOffBlock,
+  SLOT_INTERVAL_MINUTES,
+  hasDayOffOverlap,
+} from "./booking-utils"
 
 export function generateTimeSlots({
   day,
   startHour,
   endHour,
+  dayOffs = [],
 }: {
   day: Date
   startHour: string
   endHour: string
+  dayOffs?: DayOffBlock[]
 }) {
   const slots: Date[] = []
 
@@ -23,7 +29,16 @@ export function generateTimeSlots({
       milliseconds: 0,
     })
 
-    slots.push(slot)
+    const overlapsDayOff = hasDayOffOverlap({
+      day,
+      start: slot,
+      durationInMinutes: SLOT_INTERVAL_MINUTES,
+      dayOffs,
+    })
+
+    if (!overlapsDayOff) {
+      slots.push(slot)
+    }
 
     minute += SLOT_INTERVAL_MINUTES
     if (minute >= 60) {

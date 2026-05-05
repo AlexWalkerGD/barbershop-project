@@ -20,6 +20,8 @@ import { DialogTrigger } from "@radix-ui/react-dialog"
 import NewBooking from "@/components/new-booking"
 import { generateTimeSlots } from "@/lib/generate-time-slots"
 import BookingInfo from "@/components/bookingInfo"
+import { getBusinessDateKey } from "@/lib/timezone-utils"
+import { DayOffBlock } from "@/lib/booking-utils"
 
 interface Booking {
   id: string
@@ -69,6 +71,17 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const [availability, setAvailability] = useState<
     { day: string; enabled: boolean; startHour: string; endHour: string }[]
   >([])
+  const [dayOffs, setDayOffs] = useState<DayOffBlock[]>([])
+
+  const allDayOffDateSet = useMemo(
+    () =>
+      new Set(
+        dayOffs
+          .filter((dayOff) => dayOff.allDay !== false)
+          .map((dayOff) => dayOff.date),
+      ),
+    [dayOffs],
+  )
 
   const enabledWeekDays = useMemo(
     () =>
@@ -79,8 +92,9 @@ export default function Schedules({ params }: { params: { id: string } }) {
   const disabledDays = useMemo(
     () => (date: Date) =>
       isBefore(startOfDay(date), startOfToday()) ||
-      !enabledWeekDays.includes(date.getDay()),
-    [enabledWeekDays],
+      !enabledWeekDays.includes(date.getDay()) ||
+      allDayOffDateSet.has(getBusinessDateKey(date)),
+    [enabledWeekDays, allDayOffDateSet],
   )
 
   const weekDay = selectedDate
@@ -91,13 +105,19 @@ export default function Schedules({ params }: { params: { id: string } }) {
     (d) => d.day === weekDay && d.enabled,
   )
 
-  const slots = dayAvailability
-    ? generateTimeSlots({
-        day: selectedDate,
-        startHour: dayAvailability.startHour,
-        endHour: dayAvailability.endHour,
-      })
-    : []
+  const selectedDateIsDayOff = allDayOffDateSet.has(
+    getBusinessDateKey(selectedDate),
+  )
+
+  const slots =
+    dayAvailability && !selectedDateIsDayOff
+      ? generateTimeSlots({
+          day: selectedDate,
+          startHour: dayAvailability.startHour,
+          endHour: dayAvailability.endHour,
+          dayOffs,
+        })
+      : []
 
   useEffect(() => {
     if (!params.id || !selectedDate) return
@@ -131,6 +151,11 @@ export default function Schedules({ params }: { params: { id: string } }) {
     fetch(`/api/availability?employeeId=${selectedEmployee.id}`)
       .then((res) => res.json())
       .then((data) => setAvailability(data))
+      .catch((err) => console.error(err))
+
+    fetch(`/api/day-offs?employeeId=${selectedEmployee.id}`)
+      .then((res) => res.json())
+      .then((data) => setDayOffs(data))
       .catch((err) => console.error(err))
   }, [selectedEmployee])
 

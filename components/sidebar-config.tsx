@@ -24,6 +24,7 @@ import { deleteService } from "@/app/_actions/delete.service"
 import EditBarbershop from "./edit-barbershop"
 import { AvailabilityCard } from "./availability card"
 import { formatDurationLabel } from "@/lib/booking-utils"
+import DayOff from "./dayOff"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [dataBarbershop, setDataBarbershop] = useState({
@@ -44,6 +45,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [addNewEmployee, setAddNewEmployee] = useState(false)
   const [addNewService, setAddNewService] = useState(false)
   const [editAvailability, setEditAvailability] = useState(false)
+  const [newDayOff, setNewDayOff] = useState(false)
 
   const handleSuccessNewEmployee = async () => {
     setAddNewEmployee(false)
@@ -240,15 +242,26 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center justify-between px-3">
               <h2 className="pt-2 text-center font-bold">Disponibilidade</h2>
-              <Button
-                variant="secondary"
-                className="mt-3"
-                onClick={() => {
-                  setEditAvailability(true)
-                }}
-              >
-                Editar
-              </Button>
+              <div className="flex flex-row gap-2">
+                <Button
+                  variant="secondary"
+                  className="mt-3"
+                  onClick={() => {
+                    setEditAvailability(true)
+                  }}
+                >
+                  Editar
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="mt-3 flex w-fit justify-end"
+                  onClick={() => {
+                    setNewDayOff(true)
+                  }}
+                >
+                  Folga Extra
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
@@ -371,6 +384,12 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
             }
             onSuccess={handleSuccessEditAvailability}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={newDayOff} onOpenChange={(open) => setNewDayOff(open)}>
+        <DialogContent className="w-[90%]">
+          <DayOff employees={dataBarbershop.employees ?? []} />
         </DialogContent>
       </Dialog>
     </SheetContent>

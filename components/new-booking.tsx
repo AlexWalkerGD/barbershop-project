@@ -9,10 +9,12 @@ import { isBefore, startOfDay, startOfToday } from "date-fns"
 import { createBooking } from "@/app/_actions/create-booking"
 import { getBookings } from "@/app/_actions/get_bookings"
 import {
+  DayOffBlock,
   buildDateFromTime,
   formatDurationLabel,
   generateAvailableTimeStrings,
 } from "@/lib/booking-utils"
+import { getBusinessDateKey } from "@/lib/timezone-utils"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 
@@ -63,12 +65,16 @@ const WEEK_DAY_INDEX: Record<string, number> = {
 const NewBooking = ({
   barbershop,
   availability,
+  employee,
+  services,
   onSuccess,
 }: NewBookingProps) => {
   const [name, setName] = useState("")
   const [selectedDay, setSelectedDay] = useState(new Date())
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null)
-  const [selectedService, setSelectedService] = useState<any>(null)
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(employee)
+  const [selectedService, setSelectedService] = useState<any>(services)
+  const [employeeAvailability, setEmployeeAvailability] =
+    useState<Availability[]>(availability)
   const [employeeSelectOpen, setEmployeeSelectOpen] = useState(false)
   const [serviceSelectOpen, setServiceSelectOpen] = useState(false)
   const [bookings, setBookings] = useState<
@@ -77,28 +83,44 @@ const NewBooking = ({
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
     undefined,
   )
+  const [dayOffs, setDayOffs] = useState<DayOffBlock[]>([])
 
   const enabledWeekDays = useMemo(
     () =>
-      availability.filter((d) => d.enabled).map((d) => WEEK_DAY_INDEX[d.day]),
-    [availability],
+      employeeAvailability
+        .filter((d) => d.enabled)
+        .map((d) => WEEK_DAY_INDEX[d.day]),
+    [employeeAvailability],
+  )
+
+  const allDayOffDateSet = useMemo(
+    () =>
+      new Set(
+        dayOffs
+          .filter((dayOff) => dayOff.allDay !== false)
+          .map((dayOff) => dayOff.date),
+      ),
+    [dayOffs],
   )
 
   const disabledDays = useMemo(
     () => (date: Date) =>
       isBefore(startOfDay(date), startOfToday()) ||
-      !enabledWeekDays.includes(date.getDay()),
-    [enabledWeekDays],
+      !enabledWeekDays.includes(date.getDay()) ||
+      allDayOffDateSet.has(getBusinessDateKey(date)),
+    [enabledWeekDays, allDayOffDateSet],
   )
 
   const availableTimes = useMemo(() => {
-    if (!selectedDay || !availability.length || !selectedService) return []
+    if (!selectedDay || !employeeAvailability.length || !selectedService)
+      return []
+    if (allDayOffDateSet.has(getBusinessDateKey(selectedDay))) return []
 
     const weekDay = selectedDay
       .toLocaleDateString("en-US", { weekday: "long" })
       .toLowerCase()
 
-    const dayAvailability = availability.find(
+    const dayAvailability = employeeAvailability.find(
       (d) => d.day === weekDay && d.enabled,
     )
 
@@ -110,8 +132,16 @@ const NewBooking = ({
       endHour: dayAvailability.endHour,
       durationInMinutes: selectedService.durationInMinutes ?? 30,
       bookings,
+      dayOffs,
     })
-  }, [selectedDay, availability, bookings, selectedService])
+  }, [
+    selectedDay,
+    employeeAvailability,
+    bookings,
+    selectedService,
+    allDayOffDateSet,
+    dayOffs,
+  ])
 
   const selectedDate = useMemo(() => {
     if (!selectedDay || !selectedTime) return
@@ -155,6 +185,32 @@ const NewBooking = ({
 
     fetchBookings()
   }, [selectedDay, selectedEmployee])
+
+  useEffect(() => {
+    if (!selectedEmployee?.id) {
+      setDayOffs([])
+      setEmployeeAvailability([])
+      return
+    }
+
+    fetch(`/api/availability?employeeId=${selectedEmployee.id}`)
+      .then((res) => res.json())
+      .then((response) => setEmployeeAvailability(response))
+      .catch((err) => console.error(err))
+
+    fetch(`/api/day-offs?employeeId=${selectedEmployee.id}`)
+      .then((res) => res.json())
+      .then((response) => setDayOffs(response))
+      .catch((err) => console.error(err))
+  }, [selectedEmployee])
+
+  useEffect(() => {
+    setSelectedEmployee(employee)
+  }, [employee])
+
+  useEffect(() => {
+    setSelectedService(services)
+  }, [services])
 
   useEffect(() => {
     setSelectedTime(undefined)

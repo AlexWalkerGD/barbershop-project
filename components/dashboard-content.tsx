@@ -55,7 +55,7 @@ const createCardData = (stats: DashboardStats) => [
     value: String(stats.monthBookings.value),
   },
   {
-    title: "Faturamento",
+    title: "Lucro",
     metric: stats.monthRevenue,
     value: formatCurrency(stats.monthRevenue.value),
   },

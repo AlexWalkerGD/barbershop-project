@@ -12,10 +12,12 @@ import { isBefore, startOfDay, startOfToday } from "date-fns"
 import { createBooking } from "@/app/_actions/create-booking"
 import { getBookings } from "@/app/_actions/get_bookings"
 import {
+  DayOffBlock,
   buildDateFromTime,
   formatDurationLabel,
   generateAvailableTimeStrings,
 } from "@/lib/booking-utils"
+import { getBusinessDateKey } from "@/lib/timezone-utils"
 
 import BookingSummary from "./booking-summary"
 import { Button } from "./ui/button"
@@ -69,6 +71,17 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   >([])
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
   const [availability, setAvailability] = useState<AvailabilityItem[]>([])
+  const [dayOffs, setDayOffs] = useState<DayOffBlock[]>([])
+
+  const allDayOffDateSet = useMemo(
+    () =>
+      new Set(
+        dayOffs
+          .filter((dayOff) => dayOff.allDay !== false)
+          .map((dayOff) => dayOff.date),
+      ),
+    [dayOffs],
+  )
 
   const enabledWeekDays = useMemo(
     () =>
@@ -79,8 +92,9 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
   const disabledDays = useMemo(
     () => (date: Date) =>
       isBefore(startOfDay(date), startOfToday()) ||
-      !enabledWeekDays.includes(date.getDay()),
-    [enabledWeekDays],
+      !enabledWeekDays.includes(date.getDay()) ||
+      allDayOffDateSet.has(getBusinessDateKey(date)),
+    [enabledWeekDays, allDayOffDateSet],
   )
 
   useEffect(() => {
@@ -89,6 +103,11 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
     fetch(`/api/availability?employeeId=${employee.id}`)
       .then((res) => res.json())
       .then((response) => setAvailability(response))
+      .catch((err) => console.error(err))
+
+    fetch(`/api/day-offs?employeeId=${employee.id}`)
+      .then((res) => res.json())
+      .then((response) => setDayOffs(response))
       .catch((err) => console.error(err))
   }, [employee])
 
@@ -109,6 +128,7 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
 
   const availableTimes = useMemo(() => {
     if (!selectedDay || !availability.length) return []
+    if (allDayOffDateSet.has(getBusinessDateKey(selectedDay))) return []
 
     const weekDay = selectedDay
       .toLocaleDateString("en-US", { weekday: "long" })
@@ -126,8 +146,16 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
       endHour: dayAvailability.endHour,
       durationInMinutes: service.durationInMinutes ?? 30,
       bookings: dayBookings,
+      dayOffs,
     })
-  }, [selectedDay, availability, dayBookings, service.durationInMinutes])
+  }, [
+    selectedDay,
+    availability,
+    dayBookings,
+    service.durationInMinutes,
+    allDayOffDateSet,
+    dayOffs,
+  ])
 
   const selectedDate = useMemo(() => {
     if (!selectedDay || !selectedTime) return

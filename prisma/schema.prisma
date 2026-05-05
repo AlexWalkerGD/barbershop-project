@@ -160,3 +160,14 @@ model Availability {
   @@unique([employeeId, day], name: "employeeId_day")
 }
 
+model EmployeeDayOff {
+  id         String   @id @default(cuid())
+  employeeId String
+  date       String
+  allDay     Boolean  @default(true)
+  startHour  String?
+  endHour    String?
+  reason     String?
+  createdAt  DateTime @default(now())
+}
+
