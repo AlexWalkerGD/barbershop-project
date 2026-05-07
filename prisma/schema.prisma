@@ -18,6 +18,11 @@ enum GoalType {
   CLIENTS
 }
 
+enum DiscountType {
+  PERCENTAGE
+  AMOUNT
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -109,9 +114,24 @@ model Barbershop {
   updatedAt   DateTime            @updatedAt
   services    BarbershopService[]
   employees   BarbershopEmployee[]  
+  promotions  Promotion[]
 
   ownerId     String?             
   owner       User?               @relation("Owner", fields: [ownerId], references: [id])
+}
+
+model Promotion {
+  id            String       @id @default(uuid())
+  name          String
+  description   String?
+  discountType  DiscountType
+  discountValue Decimal      @db.Decimal(10, 2)
+  appliesTo     String?
+  active        Boolean      @default(true)
+  barbershopId  String
+  barbershop    Barbershop   @relation(fields: [barbershopId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model BarbershopService {
