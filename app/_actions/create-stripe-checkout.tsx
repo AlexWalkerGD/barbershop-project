@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { getServerSession } from "next-auth"
 import Stripe from "stripe"
 import { actionClient } from "@/lib/next-safe-action"
+import { db } from "@/lib/prisma"
 
 export const createStripeCheckout = actionClient.action(async () => {
   const session = await getServerSession(authOptions)
@@ -16,6 +17,15 @@ export const createStripeCheckout = actionClient.action(async () => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2026-01-28.clover",
   })
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      email: true,
+      stripeCustomerId: true,
+    },
+  })
+
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "subscription",
@@ -25,7 +35,11 @@ export const createStripeCheckout = actionClient.action(async () => {
     metadata: {
       userId: session.user.id,
     },
+    ...(user?.stripeCustomerId
+      ? { customer: user.stripeCustomerId }
+      : { customer_email: user?.email ?? session.user.email ?? undefined }),
     subscription_data: {
+      trial_period_days: 30,
       metadata: {
         userId: session.user.id,
       },

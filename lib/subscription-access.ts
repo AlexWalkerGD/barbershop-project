@@ -1,5 +1,11 @@
 type SubscriptionLike = {
-  status: "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "UNPAID"
+  status:
+    | "ACTIVE"
+    | "TRIALING"
+    | "INCOMPLETE"
+    | "PAST_DUE"
+    | "CANCELED"
+    | "UNPAID"
   currentPeriodEnd: Date
 }
 
@@ -11,7 +17,7 @@ export function hasActiveSubscription(subscription?: SubscriptionLike | null) {
   }
 
   return (
-    subscription.status === "ACTIVE" &&
+    (subscription.status === "ACTIVE" || subscription.status === "TRIALING") &&
     subscription.currentPeriodEnd.getTime() > Date.now()
   )
 }

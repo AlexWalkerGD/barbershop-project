@@ -16,7 +16,13 @@ export function getCurrentPeriodEndDate(
 
 export async function syncUserRoleFromStoredSubscription(params: {
   stripeSubscriptionId: string
-  status: "ACTIVE" | "INCOMPLETE" | "PAST_DUE" | "CANCELED" | "UNPAID"
+  status:
+    | "ACTIVE"
+    | "TRIALING"
+    | "INCOMPLETE"
+    | "PAST_DUE"
+    | "CANCELED"
+    | "UNPAID"
   currentPeriodEnd: Date
 }) {
   const subscriptionRecord = await db.subscription.findUnique({
@@ -90,6 +96,10 @@ export async function syncSubscriptionFromCheckoutSession(sessionId: string) {
   const nextStatus = mapStripeStatus(subscription.status)
   const nextCurrentPeriodEnd =
     getCurrentPeriodEndDate(subscription) ?? new Date()
+  const stripeCustomerId =
+    typeof subscription.customer === "string"
+      ? subscription.customer
+      : subscription.customer.id
 
   await db.subscription.upsert({
     where: { userId },
@@ -111,6 +121,7 @@ export async function syncSubscriptionFromCheckoutSession(sessionId: string) {
   await db.user.update({
     where: { id: userId },
     data: {
+      stripeCustomerId,
       role: getEffectiveUserRole("USER", {
         status: nextStatus,
         currentPeriodEnd: nextCurrentPeriodEnd,

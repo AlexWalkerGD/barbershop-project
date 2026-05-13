@@ -38,6 +38,11 @@ interface ServiceItemProps {
   service: BarbershopService
   barbershop: Pick<Barbershop, "name">
   employee: User
+  activePromotion?: {
+    id: string
+    name: string
+    discountValue: string
+  } | null
 }
 
 interface AvailabilityItem {
@@ -57,7 +62,18 @@ const WEEK_DAY_INDEX: Record<string, number> = {
   saturday: 6,
 }
 
-const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
+const formatCurrency = (value: number) =>
+  Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "EUR",
+  }).format(value)
+
+const ServiceItem = ({
+  employee,
+  service,
+  barbershop,
+  activePromotion,
+}: ServiceItemProps) => {
   const router = useRouter()
   const { data } = useSession()
 
@@ -163,6 +179,15 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
     return buildDateFromTime(selectedDay, selectedTime)
   }, [selectedDay, selectedTime])
 
+  const discountPercentage = activePromotion
+    ? Number(activePromotion.discountValue)
+    : 0
+  const originalPrice = Number(service.price)
+  const promotionalPrice =
+    discountPercentage > 0
+      ? originalPrice * (1 - discountPercentage / 100)
+      : originalPrice
+
   const handleBookingClick = () => {
     if (!employee) {
       toast.error("Selecione um funcionário")
@@ -234,12 +259,27 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
             </p>
 
             <div className="flex items-center justify-between">
-              <p className="text-sm font-bold text-primary">
-                {Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "EUR",
-                }).format(Number(service.price))}
-              </p>
+              <div>
+                {activePromotion ? (
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-primary">
+                        {formatCurrency(promotionalPrice)}
+                      </p>
+                      <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        -{discountPercentage}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-through">
+                      {formatCurrency(originalPrice)}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm font-bold text-primary">
+                    {formatCurrency(originalPrice)}
+                  </p>
+                )}
+              </div>
 
               <Sheet
                 open={bookingSheetIsOpen}
@@ -329,6 +369,7 @@ const ServiceItem = ({ employee, service, barbershop }: ServiceItemProps) => {
                           barbershop={barbershop}
                           service={service}
                           selectedDate={selectedDate}
+                          activePromotion={activePromotion}
                         />
                       </div>
                     )}

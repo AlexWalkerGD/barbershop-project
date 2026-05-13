@@ -6,14 +6,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/prisma"
 
-type PromotionDiscountType = "percentage" | "amount"
-
 interface CreatePromotionParams {
   name: string
   description?: string
-  discountType: PromotionDiscountType
   discountValue: string
-  appliesTo?: string
+  endsAt: string
+  serviceId?: string | null
 }
 
 interface UpdatePromotionParams extends CreatePromotionParams {
@@ -25,7 +23,7 @@ const getCurrentUserBarbershop = async () => {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
-    throw new Error("Usuario nao autenticado")
+    throw new Error("Usuario não autenticado")
   }
 
   const barbershop = await db.barbershop.findFirst({
@@ -38,16 +36,13 @@ const getCurrentUserBarbershop = async () => {
   })
 
   if (!barbershop) {
-    throw new Error("Barbearia nao encontrada")
+    throw new Error("Barbearia não encontrada")
   }
 
   return barbershop
 }
 
-const parseDiscountValue = (
-  discountValue: string,
-  discountType: PromotionDiscountType,
-) => {
+const parseDiscountValue = (discountValue: string) => {
   const normalizedValue = discountValue.replace(",", ".").trim()
   const parsedValue = Number(normalizedValue)
 
@@ -55,38 +50,65 @@ const parseDiscountValue = (
     throw new Error("O desconto deve ser maior que zero")
   }
 
-  if (discountType === "percentage" && parsedValue > 100) {
-    throw new Error("O desconto percentual nao pode passar de 100")
+  if (parsedValue > 100) {
+    throw new Error("O desconto percentual não pode passar de 100")
   }
 
   return parsedValue
 }
 
-const getDiscountType = (discountType: PromotionDiscountType) => {
-  return discountType === "percentage" ? "PERCENTAGE" : "AMOUNT"
+const parseEndsAt = (endsAt: string) => {
+  const parsedDate = new Date(`${endsAt}T23:59:59.999`)
+
+  if (!endsAt || Number.isNaN(parsedDate.getTime())) {
+    throw new Error("A data de termino é obrigatória")
+  }
+
+  if (parsedDate < new Date()) {
+    throw new Error("A data de termino não pode estar no passado")
+  }
+
+  return parsedDate
 }
 
 export const createPromotion = async ({
   name,
   description,
-  discountType,
   discountValue,
-  appliesTo,
+  endsAt,
+  serviceId,
 }: CreatePromotionParams) => {
   const barbershop = await getCurrentUserBarbershop()
   const trimmedName = name.trim()
 
   if (!trimmedName) {
-    throw new Error("O nome da promocao e obrigatorio")
+    throw new Error("O nome da promoção é obrigatório")
+  }
+
+  if (serviceId) {
+    const service = await db.barbershopService.findFirst({
+      where: {
+        id: serviceId,
+        barbershopId: barbershop.id,
+      },
+      select: {
+        id: true,
+      },
+    })
+
+    if (!service) {
+      throw new Error("Serviço não encontrado para esta barbearia")
+    }
   }
 
   const promotion = await db.promotion.create({
     data: {
       name: trimmedName,
       description: description?.trim() || null,
-      discountType: getDiscountType(discountType),
-      discountValue: parseDiscountValue(discountValue, discountType),
-      appliesTo: appliesTo?.trim() || "Todos os servicos",
+      discountType: "PERCENTAGE",
+      discountValue: parseDiscountValue(discountValue),
+      endsAt: parseEndsAt(endsAt),
+      serviceId: serviceId || null,
       barbershopId: barbershop.id,
     },
   })
@@ -100,16 +122,32 @@ export const updatePromotion = async ({
   promotionId,
   name,
   description,
-  discountType,
   discountValue,
-  appliesTo,
+  endsAt,
+  serviceId,
   active,
 }: UpdatePromotionParams) => {
   const barbershop = await getCurrentUserBarbershop()
   const trimmedName = name.trim()
 
   if (!trimmedName) {
-    throw new Error("O nome da promocao e obrigatorio")
+    throw new Error("O nome da promoção é obrigatório")
+  }
+
+  if (serviceId) {
+    const service = await db.barbershopService.findFirst({
+      where: {
+        id: serviceId,
+        barbershopId: barbershop.id,
+      },
+      select: {
+        id: true,
+      },
+    })
+
+    if (!service) {
+      throw new Error("Serviço não encontrado para esta barbearia")
+    }
   }
 
   const promotion = await db.promotion.update({
@@ -120,9 +158,10 @@ export const updatePromotion = async ({
     data: {
       name: trimmedName,
       description: description?.trim() || null,
-      discountType: getDiscountType(discountType),
-      discountValue: parseDiscountValue(discountValue, discountType),
-      appliesTo: appliesTo?.trim() || "Todos os servicos",
+      discountType: "PERCENTAGE",
+      discountValue: parseDiscountValue(discountValue),
+      endsAt: parseEndsAt(endsAt),
+      serviceId: serviceId || null,
       active,
     },
   })
@@ -146,7 +185,7 @@ export const togglePromotionActive = async (promotionId: string) => {
   })
 
   if (!currentPromotion) {
-    throw new Error("Promocao nao encontrada")
+    throw new Error("Promoção não encontrada")
   }
 
   const promotion = await db.promotion.update({

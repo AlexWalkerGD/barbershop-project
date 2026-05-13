@@ -77,6 +77,7 @@ model Subscription {
 
 enum SubscriptionStatus {
   ACTIVE
+  TRIALING
   INCOMPLETE
   PAST_DUE
   CANCELED
@@ -126,10 +127,12 @@ model Promotion {
   description   String?
   discountType  DiscountType
   discountValue Decimal      @db.Decimal(10, 2)
-  appliesTo     String?
+  endsAt        DateTime
   active        Boolean      @default(true)
   barbershopId  String
   barbershop    Barbershop   @relation(fields: [barbershopId], references: [id])
+  serviceId     String?
+  service       BarbershopService? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
@@ -144,6 +147,7 @@ model BarbershopService {
   barbershopId String
   barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
   bookings     Booking[]
+  promotions   Promotion[]
 }
 
 model Booking {

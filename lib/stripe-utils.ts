@@ -4,6 +4,8 @@ export function mapStripeStatus(status: Stripe.Subscription.Status) {
   switch (status) {
     case "active":
       return "ACTIVE"
+    case "trialing":
+      return "TRIALING"
     case "past_due":
       return "PAST_DUE"
     case "canceled":

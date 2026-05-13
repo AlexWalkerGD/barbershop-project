@@ -47,11 +47,11 @@ const TIME_LIST = Array.from(
 
 export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
   const WEEK_DAYS = [
-    { key: "monday", label: "Segunda-feira" },
-    { key: "tuesday", label: "Terça-feira" },
-    { key: "wednesday", label: "Quarta-feira" },
-    { key: "thursday", label: "Quinta-feira" },
-    { key: "friday", label: "Sexta-feira" },
+    { key: "monday", label: "Segunda" },
+    { key: "tuesday", label: "Terça" },
+    { key: "wednesday", label: "Quarta" },
+    { key: "thursday", label: "Quinta" },
+    { key: "friday", label: "Sexta" },
     { key: "saturday", label: "Sábado" },
     { key: "sunday", label: "Domingo" },
   ]
@@ -110,7 +110,7 @@ export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
     }
   }
   return (
-    <div>
+    <div className="min-w-0">
       <Dialog>
         <DialogHeader>
           <DialogTitle>Disponibilidade</DialogTitle>
@@ -119,7 +119,7 @@ export const AvailabilityCard = ({ employees, onSuccess }: Props) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 px-4 pt-6">
+        <div className="flex flex-col gap-4 pt-6">
           {WEEK_DAYS.map((day) => {
             const dayData = availability.find((d) => d.day === day.key)!
 

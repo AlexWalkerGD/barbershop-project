@@ -23,8 +23,20 @@ const PromotionsPage = async () => {
     },
     include: {
       promotions: {
+        include: {
+          service: {
+            select: {
+              name: true,
+            },
+          },
+        },
         orderBy: {
           createdAt: "desc",
+        },
+      },
+      services: {
+        orderBy: {
+          name: "asc",
         },
       },
     },
@@ -34,15 +46,21 @@ const PromotionsPage = async () => {
     barbershop?.promotions.map((promotion) => ({
       id: promotion.id,
       name: promotion.name,
-      description: promotion.description ?? "Promoção sem descrição.",
-      discountType:
-        promotion.discountType === "PERCENTAGE" ? "percentage" : "amount",
+      description: promotion.description ?? "Promocao sem descrição.",
       discountValue: promotion.discountValue.toString(),
-      appliesTo: promotion.appliesTo ?? "Todos os serviços",
+      endsAt: promotion.endsAt.toISOString().slice(0, 10),
+      serviceId: promotion.serviceId,
+      appliesTo: promotion.service?.name ?? "Todos os serviços",
       active: promotion.active,
     })) ?? []
 
-  return <PromotionsClient initialPromotions={promotions} />
+  const services =
+    barbershop?.services.map((service) => ({
+      id: service.id,
+      name: service.name,
+    })) ?? []
+
+  return <PromotionsClient initialPromotions={promotions} services={services} />
 }
 
 export default PromotionsPage

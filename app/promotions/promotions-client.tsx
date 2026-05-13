@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Check, Euro, Percent, Tag, Trash2 } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
+import { CalendarDays, Check, Percent, Tag, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -10,51 +10,90 @@ import Header from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-
-type DiscountType = "percentage" | "amount"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Calendar } from "@/components/ui/calendar"
+import { ptBR } from "date-fns/locale"
 
 export type Promotion = {
   id: string
   name: string
   description: string
-  discountType: DiscountType
   discountValue: string
+  endsAt: string
+  serviceId: string | null
   appliesTo: string
   active: boolean
 }
 
-interface PromotionsClientProps {
-  initialPromotions: Promotion[]
+type ServiceOption = {
+  id: string
+  name: string
 }
 
-const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
+interface PromotionsClientProps {
+  initialPromotions: Promotion[]
+  services: ServiceOption[]
+}
+
+const ALL_SERVICES_VALUE = "all"
+
+const dateToInputValue = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
+}
+
+const inputValueToDate = (date: string) =>
+  date ? new Date(`${date}T12:00:00`) : undefined
+
+const formatDate = (date: string) =>
+  new Intl.DateTimeFormat("pt-BR").format(new Date(`${date}T12:00:00`))
+
+const PromotionsClient = ({
+  initialPromotions,
+  services,
+}: PromotionsClientProps) => {
   const router = useRouter()
+  const calendarRef = useRef<HTMLDivElement>(null)
   const [formIsOpen, setFormIsOpen] = useState(false)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [discountType, setDiscountType] = useState<DiscountType>("percentage")
   const [discountValue, setDiscountValue] = useState("")
-  const [appliesTo, setAppliesTo] = useState("")
+  const [openCalendar, setOpenCalendar] = useState<"from" | "to" | null>(null)
+  const [endsAt, setEndsAt] = useState("")
+  const [selectedServiceId, setSelectedServiceId] = useState(ALL_SERVICES_VALUE)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [removingPromotionId, setRemovingPromotionId] = useState<string | null>(
     null,
   )
 
-  const activePromotions = useMemo(
-    () => initialPromotions.filter((promotion) => promotion.active).length,
-    [initialPromotions],
-  )
+  const activePromotions = useMemo(() => {
+    const now = new Date()
+
+    return initialPromotions.filter(
+      (promotion) =>
+        promotion.active && new Date(`${promotion.endsAt}T23:59:59.999`) >= now,
+    ).length
+  }, [initialPromotions])
 
   const resetForm = () => {
     setName("")
     setDescription("")
-    setDiscountType("percentage")
     setDiscountValue("")
-    setAppliesTo("")
+    setEndsAt("")
+    setSelectedServiceId(ALL_SERVICES_VALUE)
   }
 
   const handleAddPromotion = async () => {
-    if (!name.trim() || !discountValue.trim()) return
+    if (!name.trim() || !discountValue.trim() || !endsAt) return
 
     try {
       setIsSubmitting(true)
@@ -62,9 +101,10 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
       await createPromotion({
         name,
         description,
-        discountType,
         discountValue,
-        appliesTo,
+        endsAt,
+        serviceId:
+          selectedServiceId === ALL_SERVICES_VALUE ? null : selectedServiceId,
       })
 
       resetForm()
@@ -94,10 +134,62 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
     }
   }
 
-  const formatDiscount = (promotion: Promotion) =>
-    promotion.discountType === "percentage"
-      ? `${promotion.discountValue}%`
-      : `€ ${promotion.discountValue}`
+  const DateButton = ({
+    id,
+    value,
+    placeholder,
+    calendarAlign = "start",
+    isOpen,
+    onOpen,
+    onChange,
+  }: {
+    id: string
+    value: string
+    placeholder: string
+    calendarAlign?: "start" | "end"
+    isOpen: boolean
+    onOpen: () => void
+    onChange: (value: string) => void
+  }) => (
+    <div className="relative min-w-0 flex-1 sm:w-[104px] sm:flex-none">
+      <div className="flex flex-row items-center">
+        <CalendarDays className="h-5 w-5 text-muted-foreground" />
+        <button
+          id={id}
+          type="button"
+          onClick={onOpen}
+          className="h-9 w-full bg-transparent px-1 text-center text-sm outline-none focus-visible:ring-0"
+        >
+          {value ? (
+            formatDate(value)
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+        </button>
+      </div>
+
+      {isOpen && (
+        <div
+          ref={calendarRef}
+          className={`absolute top-11 z-50 rounded-xl border bg-background shadow-lg ${
+            calendarAlign === "end" ? "right-0" : "left-0"
+          }`}
+        >
+          <Calendar
+            locale={ptBR}
+            className="p-2 [--cell-size:1.75rem] sm:p-3 sm:[--cell-size:2rem]"
+            mode="single"
+            selected={inputValueToDate(value)}
+            onSelect={(date) => {
+              if (!date) return
+              onChange(dateToInputValue(date))
+              setOpenCalendar(null)
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <div>
@@ -108,7 +200,8 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
           <div>
             <h1 className="text-xl font-bold">Promoções</h1>
             <p className="text-sm text-muted-foreground">
-              Organize descontos e ofertas para usar nas suas campanhas.
+              Crie descontos automáticos por período para todos os serviços ou
+              para um serviço específico.
             </p>
           </div>
 
@@ -116,7 +209,6 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
             <div className="flex flex-row items-center gap-0.5 rounded-md border px-3 py-2 text-sm">
               <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
               <span className="px-0.5 font-semibold">{activePromotions} </span>
-              {"  "}
               ativas
             </div>
             <Button onClick={() => setFormIsOpen((isOpen) => !isOpen)}>
@@ -128,58 +220,71 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
         {formIsOpen && (
           <Card className="p-4">
             <div className="grid gap-4">
-              <div className="grid gap-3 md:grid-cols-[1fr_180px]">
+              <div className="grid gap-3 md:grid-cols-[1fr_160px_170px]">
                 <Input
                   placeholder="Nome da promoção"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                 />
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={
-                      discountType === "percentage" ? "default" : "outline"
-                    }
-                    onClick={() => setDiscountType("percentage")}
-                  >
-                    <Percent className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={discountType === "amount" ? "default" : "outline"}
-                    onClick={() => setDiscountType("amount")}
-                  >
-                    <Euro className="h-4 w-4" />
-                  </Button>
+                <div className="relative">
+                  <Percent className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-9"
+                    inputMode="decimal"
+                    placeholder="Desconto"
+                    value={discountValue}
+                    onChange={(event) => setDiscountValue(event.target.value)}
+                  />
                 </div>
+
+                <DateButton
+                  id="promotions to date"
+                  value={endsAt}
+                  placeholder="dd/mm/aaaa"
+                  isOpen={openCalendar === "to"}
+                  onOpen={() => setOpenCalendar("to")}
+                  onChange={setEndsAt}
+                  calendarAlign="end"
+                />
               </div>
 
-              <div className="grid gap-3 md:grid-cols-[1fr_140px]">
+              <div className="grid gap-3 md:grid-cols-[1fr_220px]">
                 <Input
-                  placeholder="Descrição"
+                  placeholder="Descrição opcional"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
-                <Input
-                  inputMode="decimal"
-                  placeholder={discountType === "percentage" ? "%" : "€"}
-                  value={discountValue}
-                  onChange={(event) => setDiscountValue(event.target.value)}
-                />
+
+                <Select
+                  value={selectedServiceId}
+                  onValueChange={setSelectedServiceId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Aplicar em" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ALL_SERVICES_VALUE}>
+                      Todos os serviços
+                    </SelectItem>
+                    {services.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-                <Input
-                  placeholder="Aplicar em"
-                  value={appliesTo}
-                  onChange={(event) => setAppliesTo(event.target.value)}
-                />
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   onClick={handleAddPromotion}
                   disabled={
-                    isSubmitting || !name.trim() || !discountValue.trim()
+                    isSubmitting ||
+                    !name.trim() ||
+                    !discountValue.trim() ||
+                    !endsAt
                   }
                 >
                   <Check className="mr-2 h-4 w-4" />
@@ -227,8 +332,12 @@ const PromotionsClient = ({ initialPromotions }: PromotionsClientProps) => {
 
                   <div className="mt-5">
                     <p className="text-3xl font-semibold leading-none text-primary">
-                      {formatDiscount(promotion)}
+                      {promotion.discountValue}%
                     </p>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                      <CalendarDays className="h-4 w-4" />
+                      <span>Termina em {formatDate(promotion.endsAt)}</span>
+                    </div>
                     <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                       {promotion.description}
                     </p>

@@ -25,6 +25,7 @@ import EditBarbershop from "./edit-barbershop"
 import { AvailabilityCard } from "./availability card"
 import { formatDurationLabel } from "@/lib/booking-utils"
 import DayOff from "./dayOff"
+import Link from "next/link"
 
 const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
   const [dataBarbershop, setDataBarbershop] = useState({
@@ -176,15 +177,20 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
           <div className="flex flex-col gap-2">
             <div className="flex flex-row items-center justify-between px-3">
               <h2 className="pt-2 text-center font-bold">Serviços</h2>
-              <Button
-                variant="secondary"
-                className="mt-3"
-                onClick={() => {
-                  setAddNewService(true)
-                }}
-              >
-                + Novo
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" className="mt-3" asChild>
+                  <Link href={`/promotions`}>Promoções</Link>
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="mt-3"
+                  onClick={() => {
+                    setAddNewService(true)
+                  }}
+                >
+                  + Novo
+                </Button>
+              </div>
             </div>
             <div className="flex items-center justify-between gap-3 border-b border-solid"></div>
             <div className="mx-2 flex flex-row justify-between rounded-sm bg-secondary p-[6px]">
@@ -388,7 +394,7 @@ const SidebarConfig = ({ barbershop, onSuccess }: BarbershopItemProps) => {
       </Dialog>
 
       <Dialog open={newDayOff} onOpenChange={(open) => setNewDayOff(open)}>
-        <DialogContent className="w-[90%]">
+        <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto overflow-x-hidden">
           <DayOff employees={dataBarbershop.employees ?? []} />
         </DialogContent>
       </Dialog>

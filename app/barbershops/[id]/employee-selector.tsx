@@ -29,6 +29,13 @@ interface AvailabilityItem {
   endHour: string
 }
 
+interface ActivePromotion {
+  id: string
+  name: string
+  discountValue: string
+  serviceId: string | null
+}
+
 const WEEK_DAYS = [
   { key: "monday", label: "Segunda" },
   { key: "tuesday", label: "Terca" },
@@ -49,16 +56,28 @@ const EmployeeSelector = ({
   const [selectedEmployee, setSelectedEmployee] =
     useState<SelectableEmployee | null>(null)
 
-  const employees: SelectableEmployee[] = [
-    ...barbershop.employees
-      .filter((e: any) => e.user)
-      .map((e: any) => ({
-        id: e.id,
-        name: e.user.name,
-        image: e.user.image,
-        role: "EMPLOYEE",
-      })),
-  ]
+  const employees: SelectableEmployee[] = useMemo(
+    () => [
+      ...barbershop.employees
+        .filter((e: any) => e.user)
+        .map((e: any) => ({
+          id: e.id,
+          name: e.user.name,
+          image: e.user.image,
+          role: "EMPLOYEE" as const,
+        })),
+    ],
+    [barbershop.employees],
+  )
+
+  const getPromotionForService = (serviceId: string) => {
+    const promotions = (barbershop.promotions ?? []) as ActivePromotion[]
+
+    return (
+      promotions.find((promotion) => promotion.serviceId === serviceId) ??
+      promotions.find((promotion) => promotion.serviceId === null)
+    )
+  }
 
   const availabilityByDay = useMemo(() => {
     const employeeOrder = new Map(
@@ -189,6 +208,9 @@ const EmployeeSelector = ({
                   key={service.id}
                   barbershop={JSON.parse(JSON.stringify(barbershop))}
                   service={JSON.parse(JSON.stringify(service))}
+                  activePromotion={JSON.parse(
+                    JSON.stringify(getPromotionForService(service.id) ?? null),
+                  )}
                   employee={JSON.parse(JSON.stringify(selectedEmployee))}
                 />
               ))}
@@ -264,6 +286,11 @@ const EmployeeSelector = ({
                     key={service.id}
                     barbershop={JSON.parse(JSON.stringify(barbershop))}
                     service={JSON.parse(JSON.stringify(service))}
+                    activePromotion={JSON.parse(
+                      JSON.stringify(
+                        getPromotionForService(service.id) ?? null,
+                      ),
+                    )}
                     employee={JSON.parse(JSON.stringify(selectedEmployee))}
                   />
                 ))}

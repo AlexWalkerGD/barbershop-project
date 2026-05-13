@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { ArrowRight, CalendarDays, Clock3 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "./ui/button"
+import { ptBR } from "date-fns/locale"
 import { Calendar } from "./ui/calendar"
 import {
   Select,
@@ -284,6 +285,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
     id,
     value,
     placeholder,
+    calendarAlign = "start",
     isOpen,
     onOpen,
     onChange,
@@ -291,16 +293,17 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
     id: string
     value: string
     placeholder: string
+    calendarAlign?: "start" | "end"
     isOpen: boolean
     onOpen: () => void
     onChange: (value: string) => void
   }) => (
-    <div className="relative w-[104px] shrink-0">
+    <div className="relative min-w-0 flex-1 sm:w-[104px] sm:flex-none">
       <button
         id={id}
         type="button"
         onClick={onOpen}
-        className="h-9 w-full bg-transparent px-0 text-center text-sm outline-none focus-visible:ring-0"
+        className="h-9 w-full bg-transparent px-1 text-center text-sm outline-none focus-visible:ring-0"
       >
         {value ? (
           formatDate(value)
@@ -312,9 +315,13 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
       {isOpen && (
         <div
           ref={calendarRef}
-          className="absolute left-1/2 top-11 z-50 -translate-x-1/2 rounded-xl border bg-background shadow-lg"
+          className={`absolute top-11 z-50 rounded-xl border bg-background shadow-lg ${
+            calendarAlign === "end" ? "right-0" : "left-0"
+          }`}
         >
           <Calendar
+            locale={ptBR}
+            className="p-2 [--cell-size:1.75rem] sm:p-3 sm:[--cell-size:2rem]"
             mode="single"
             selected={inputValueToDate(value)}
             onSelect={(date) => {
@@ -329,8 +336,8 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
   )
 
   return (
-    <div>
-      <div className="space-y-4">
+    <div className="min-w-0">
+      <div className="min-w-0 space-y-4">
         <DialogHeader>
           <DialogTitle>Disponibilidade</DialogTitle>
           <DialogDescription>
@@ -338,10 +345,10 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-3">
-          <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
-            <div className="relative flex items-center justify-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background">
+        <div className="grid min-w-0 gap-3">
+          <div className="min-w-0 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
+            <div className="grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-2 sm:flex sm:justify-center sm:gap-3">
+              <div className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background sm:flex">
                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
               </div>
               <DateButton
@@ -360,6 +367,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
                 isOpen={openCalendar === "to"}
                 onOpen={() => setOpenCalendar("to")}
                 onChange={setDayOffToDate}
+                calendarAlign="end"
               />
             </div>
           </div>
@@ -370,6 +378,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
             <Button
               type="button"
               variant={dayOffMode === "all-day" ? "default" : "outline"}
+              className="h-auto min-h-10 whitespace-normal px-2"
               onClick={() => setDayOffMode("all-day")}
             >
               O dia todo
@@ -377,6 +386,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
             <Button
               type="button"
               variant={dayOffMode === "period" ? "default" : "outline"}
+              className="h-auto min-h-10 whitespace-normal px-2"
               onClick={() => setDayOffMode("period")}
             >
               Por período
@@ -385,7 +395,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
         </div>
 
         {dayOffMode === "period" && (
-          <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
+          <div className="min-w-0 rounded-2xl border border-border/60 bg-muted/20 px-3 py-3">
             <div className="mb-2 flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-muted-foreground" />
               <p className="text-xs font-medium text-muted-foreground">
@@ -393,13 +403,13 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-2">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-2">
                 <Select
                   value={dayOffStartHour}
                   onValueChange={setDayOffStartHour}
                 >
-                  <SelectTrigger className="bg-background">
+                  <SelectTrigger className="min-w-0 bg-background">
                     <SelectValue placeholder="00:00" />
                   </SelectTrigger>
                   <SelectContent>
@@ -414,9 +424,9 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
                 </Select>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid min-w-0 gap-2">
                 <Select value={dayOffEndHour} onValueChange={setDayOffEndHour}>
-                  <SelectTrigger className="bg-background">
+                  <SelectTrigger className="min-w-0 bg-background">
                     <SelectValue placeholder="00:00" />
                   </SelectTrigger>
                   <SelectContent>
@@ -445,7 +455,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
         </Button>
       </div>
 
-      <div className="space-y-2">
+      <div className="min-w-0 space-y-2">
         <p className="pt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Indisponibilidades adicionadas
         </p>
@@ -454,10 +464,10 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
           blockedDates.map((item, index) => (
             <div
               key={`${item.fromDate}-${item.toDate}-${item.mode}-${index}`}
-              className="flex items-start justify-between gap-3 rounded-xl bg-muted/30 px-3 py-3"
+              className="flex min-w-0 flex-col gap-3 rounded-xl bg-muted/30 px-3 py-3 sm:flex-row sm:items-start sm:justify-between"
             >
-              <div className="space-y-1">
-                <p className="text-sm font-medium">
+              <div className="min-w-0 space-y-1">
+                <p className="break-words text-sm font-medium">
                   {formatDate(item.fromDate)} até {formatDate(item.toDate)}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -471,6 +481,7 @@ const DayOff = ({ employees = [] }: DayOffProps) => {
                 type="button"
                 variant="outline"
                 size="sm"
+                className="w-full shrink-0 sm:w-auto"
                 onClick={() => handleRemoveBlockedDate(index)}
               >
                 Remover

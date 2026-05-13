@@ -54,6 +54,8 @@ export async function POST(req: Request) {
         const sub = event.data.object as Stripe.Subscription
         const nextStatus = mapStripeStatus(sub.status)
         const nextCurrentPeriodEnd = getCurrentPeriodEndDate(sub) ?? new Date()
+        const stripeCustomerId =
+          typeof sub.customer === "string" ? sub.customer : sub.customer.id
 
         const result = await db.subscription.updateMany({
           where: { stripeSubscriptionId: sub.id },
@@ -72,6 +74,18 @@ export async function POST(req: Request) {
           status: nextStatus,
           currentPeriodEnd: nextCurrentPeriodEnd,
         })
+
+        const subscription = await db.subscription.findUnique({
+          where: { stripeSubscriptionId: sub.id },
+          select: { userId: true },
+        })
+
+        if (subscription) {
+          await db.user.update({
+            where: { id: subscription.userId },
+            data: { stripeCustomerId },
+          })
+        }
 
         console.log("Subscription updated:", sub.id)
         break

@@ -8,25 +8,57 @@ interface BookingSummaryProps {
   service: Pick<BarbershopService, "name" | "price" | "durationInMinutes">
   barbershop: Pick<BarbershopService, "name">
   selectedDate: Date
+  activePromotion?: {
+    name: string
+    discountValue: string
+  } | null
 }
 
 const BookingSummary = ({
   service,
   barbershop,
   selectedDate,
+  activePromotion,
 }: BookingSummaryProps) => {
+  const discountPercentage = activePromotion
+    ? Number(activePromotion.discountValue)
+    : 0
+  const originalPrice = Number(service.price)
+  const discountAmount = originalPrice * (discountPercentage / 100)
+  const finalPrice = originalPrice - discountAmount
+  const formatCurrency = (value: number) =>
+    Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(value)
+
   return (
     <Card>
       <CardContent className="space-y-3 p-3">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">{service.name}</h2>
-          <p className="text-sm font-bold">
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "EUR",
-            }).format(Number(service.price))}
-          </p>
+          <p className="text-sm font-bold">{formatCurrency(finalPrice)}</p>
         </div>
+
+        {activePromotion && (
+          <>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm text-muted-foreground">Valor original</h2>
+              <p className="text-sm line-through">
+                {formatCurrency(originalPrice)}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm text-muted-foreground">
+                Promocao aplicada
+              </h2>
+              <p className="text-sm text-primary">
+                -{formatCurrency(discountAmount)} ({discountPercentage}%)
+              </p>
+            </div>
+          </>
+        )}
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm text-muted-foreground">Data</h2>

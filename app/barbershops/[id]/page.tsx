@@ -12,6 +12,17 @@ const BarbershopPage = async ({ params }: { params: { id: string } }) => {
         },
       },
       services: true,
+      promotions: {
+        where: {
+          active: true,
+          endsAt: {
+            gte: new Date(),
+          },
+        },
+        orderBy: {
+          discountValue: "desc",
+        },
+      },
     },
   })
 
