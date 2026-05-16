@@ -84,6 +84,7 @@ const NewBooking = ({
     undefined,
   )
   const [dayOffs, setDayOffs] = useState<DayOffBlock[]>([])
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false)
 
   const enabledWeekDays = useMemo(
     () =>
@@ -150,11 +151,15 @@ const NewBooking = ({
   }, [selectedDay, selectedTime])
 
   const handleCreateBooking = async () => {
+    if (isCreatingBooking) return
+
     try {
       if (!selectedDate) return
       if (!name) return toast.error("Nome obrigatório")
       if (!selectedEmployee) return toast.error("Selecione um funcionário")
       if (!selectedService) return toast.error("Selecione um serviço")
+
+      setIsCreatingBooking(true)
 
       await createBooking({
         serviceId: selectedService.id,
@@ -168,6 +173,8 @@ const NewBooking = ({
     } catch (error) {
       console.error(error)
       toast.error("Erro ao criar reserva!")
+    } finally {
+      setIsCreatingBooking(false)
     }
   }
 
@@ -353,10 +360,11 @@ const NewBooking = ({
             !selectedEmployee ||
             !selectedDay ||
             !selectedTime ||
-            !selectedService
+            !selectedService ||
+            isCreatingBooking
           }
         >
-          Adicionar
+          {isCreatingBooking ? "Adicionando..." : "Adicionar"}
         </Button>
       </div>
     </div>

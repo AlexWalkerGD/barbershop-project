@@ -2,11 +2,15 @@
 
 import { randomUUID } from "crypto"
 
-import { addMinutes } from "date-fns"
+import { addMinutes, format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 import { getServerSession } from "next-auth"
 
+import { BarberBookingConfirmation } from "@/components/email/templates/admin-email"
+import { CustomerBookingConfirmation } from "@/components/email/templates/client-email"
 import { authOptions } from "@/lib/auth"
 import { hasBookingOverlap } from "@/lib/booking-utils"
+import { getEmailFrom, resend } from "@/lib/email"
 import { db } from "@/lib/prisma"
 import {
   getBusinessDateKey,
@@ -36,8 +40,9 @@ export const createBooking = async ({
 }: CreateBookingParams) => {
   try {
     let finalUserId = user?.id
+    const isManualBooking = user?.id === "crie"
 
-    if (user?.id === "crie") {
+    if (isManualBooking) {
       try {
         const newId = randomUUID()
         const tempEmail =
@@ -71,7 +76,13 @@ export const createBooking = async ({
     const service = await db.barbershopService.findUnique({
       where: { id: serviceId },
       select: {
+        name: true,
         durationInMinutes: true,
+        barbershop: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
 
@@ -154,14 +165,103 @@ export const createBooking = async ({
       throw new Error("Já existe um agendamento neste intervalo")
     }
 
-    await db.booking.create({
+    const booking = await db.booking.create({
       data: {
         serviceId,
         employeeId,
         date,
         userId: finalUserId,
       },
+      include: {
+        employee: {
+          include: {
+            user: true,
+          },
+        },
+        service: {
+          include: {
+            barbershop: true,
+          },
+        },
+        user: true,
+      },
     })
+
+    if (!isManualBooking) {
+      try {
+        const formattedDate = format(booking.date, "dd 'de' MMMM 'de' yyyy", {
+          locale: ptBR,
+        })
+        const formattedTime = format(booking.date, "HH:mm")
+        const customerName = booking.user.name ?? "Cliente"
+        const barberName = booking.employee.user.name ?? "Barbeiro"
+        const shopName = booking.service.barbershop.name
+        const emailFrom = getEmailFrom(shopName)
+
+        if (booking.user.email) {
+          const customerEmailResponse = await resend.emails.send({
+            from: emailFrom,
+            to: booking.user.email,
+            subject: `Agendamento confirmado - ${shopName}`,
+            react: CustomerBookingConfirmation({
+              customerName,
+              barberName,
+              shopName,
+              date: formattedDate,
+              time: formattedTime,
+            }),
+          })
+
+          if (customerEmailResponse.error) {
+            console.error("Erro ao enviar email para cliente:", {
+              to: booking.user.email,
+              error: customerEmailResponse.error,
+            })
+          } else {
+            console.log("Email de confirmação enviado para cliente:", {
+              to: booking.user.email,
+              id: customerEmailResponse.data?.id,
+            })
+          }
+        } else {
+          console.warn("Email de cliente não enviado: usuário sem email", {
+            userId: booking.user.id,
+          })
+        }
+
+        if (booking.employee.user.email) {
+          const barberEmailResponse = await resend.emails.send({
+            from: emailFrom,
+            to: booking.employee.user.email,
+            subject: `Novo agendamento - ${shopName}`,
+            react: BarberBookingConfirmation({
+              customerName,
+              serviceName: booking.service.name,
+              date: formattedDate,
+              time: formattedTime,
+            }),
+          })
+
+          if (barberEmailResponse.error) {
+            console.error("Erro ao enviar email para barbeiro:", {
+              to: booking.employee.user.email,
+              error: barberEmailResponse.error,
+            })
+          } else {
+            console.log("Email de novo agendamento enviado para barbeiro:", {
+              to: booking.employee.user.email,
+              id: barberEmailResponse.data?.id,
+            })
+          }
+        } else {
+          console.warn("Email de barbeiro não enviado: usuário sem email", {
+            userId: booking.employee.user.id,
+          })
+        }
+      } catch (emailError) {
+        console.error("Erro ao enviar email de agendamento:", emailError)
+      }
+    }
   } catch (err) {
     console.error("Erro na função createBooking:", err)
     throw err

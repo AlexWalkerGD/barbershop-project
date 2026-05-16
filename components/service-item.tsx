@@ -88,6 +88,7 @@ const ServiceItem = ({
   const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
   const [availability, setAvailability] = useState<AvailabilityItem[]>([])
   const [dayOffs, setDayOffs] = useState<DayOffBlock[]>([])
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false)
 
   const allDayOffDateSet = useMemo(
     () =>
@@ -210,9 +211,11 @@ const ServiceItem = ({
   }
 
   const handleCreateBooking = async () => {
-    if (!selectedDate) return
+    if (!selectedDate || isCreatingBooking) return
 
     try {
+      setIsCreatingBooking(true)
+
       await createBooking({
         serviceId: service.id,
         date: selectedDate,
@@ -231,6 +234,8 @@ const ServiceItem = ({
     } catch (error) {
       console.error(error)
       toast.error("Erro ao criar reserva!")
+    } finally {
+      setIsCreatingBooking(false)
     }
   }
 
@@ -378,10 +383,12 @@ const ServiceItem = ({
                   <SheetFooter className="px-5 pb-5">
                     <Button
                       onClick={handleCreateBooking}
-                      disabled={!selectedDay || !selectedTime}
+                      disabled={
+                        !selectedDay || !selectedTime || isCreatingBooking
+                      }
                       className="w-full"
                     >
-                      Confirmar
+                      {isCreatingBooking ? "Confirmando..." : "Confirmar"}
                     </Button>
                   </SheetFooter>
                 </SheetContent>
